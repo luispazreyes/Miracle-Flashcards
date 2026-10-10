@@ -561,7 +561,7 @@ Escenario: Sin ninguna palabra creada
 Escenario: Conflicto con cambio más reciente
   Dado que dos dispositivos editaron la misma palabra sin conexión
   Cuando ambos recuperan la conexión
-  Entonces se conserva el cambio con la marca de tiempo más reciente
+  Entonces se conserva el cambio con la marca de tiempo del servidor más reciente
 
 # EC-29 — Origen: RF-22
 Escenario: Falla la sincronización
@@ -629,6 +629,97 @@ Escenario: Respeto a la reducción de movimiento
   Entonces la animación de volteo se reduce o desaparece
 ```
 
+### Conflictos, sesión y reglas de datos (resolución de NEC)
+```gherkin
+# EC-38 — Origen: RF-29
+Escenario: Un reloj desfasado no decide el conflicto
+  Dado que un dispositivo tiene la hora adelantada un día y edita una palabra
+  Y otro dispositivo, con hora correcta, la edita después
+  Cuando ambos sincronizan
+  Entonces prevalece el cambio que llegó más tarde al servidor
+
+# EC-39 — Origen: RF-29
+Escenario: Ediciones de campos distintos no se pisan
+  Dado que un dispositivo edita la traducción y otro edita la nota de la misma palabra
+  Cuando ambos sincronizan
+  Entonces la palabra conserva la traducción nueva y la nota nueva
+
+# EC-40 — Origen: RF-29, RF-30
+Escenario: El progreso de dos dispositivos se combina
+  Dado que estudié el mismo mazo sin conexión en dos dispositivos
+  Cuando ambos sincronizan
+  Entonces se aplican todos mis aciertos y fallos en orden
+  Y el contador y el estado se recalculan sin perder lo estudiado en ninguno
+
+# EC-41 — Origen: RF-29, RF-19
+Escenario: El borrado prevalece sobre la edición
+  Dado que borré una palabra en un dispositivo y la edité en otro sin conexión
+  Cuando ambos sincronizan
+  Entonces la palabra queda eliminada
+  Y el otro dispositivo me indica que fue eliminada
+
+# EC-42 — Origen: RF-41
+Escenario: La sesión iniciada funciona sin conexión
+  Dado que ya inicié sesión
+  Cuando abro la app sin conexión
+  Entonces sigo con la sesión iniciada y puedo estudiar
+
+# EC-43 — Origen: RF-41
+Escenario: Cerrar sesión con cambios sin sincronizar
+  Dado que tengo cambios sin sincronizar
+  Cuando pido cerrar sesión
+  Entonces se me advierte de que perderé esos cambios y debo confirmar
+
+# EC-44 — Origen: RF-36
+Escenario: Duplicado por mayúsculas o espacios
+  Dado que "dog" está en un mazo
+  Cuando intento agregar "Dog " a ese mismo mazo
+  Entonces se bloquea la acción con el aviso de duplicado
+
+# EC-45 — Origen: RF-36
+Escenario: Crear una palabra con inglés ya existente
+  Dado que ya existe la palabra "bank"
+  Cuando creo otra palabra "bank" con otra traducción
+  Entonces la app me avisa de que ya existe
+  Y puedo continuar y crearla
+
+# EC-46 — Origen: RF-31
+Escenario: No repetir la misma tarjeta seguida
+  Dado que hay 2 o más palabras pendientes y fallé una tarjeta
+  Cuando continúa la sesión
+  Entonces la siguiente tarjeta es distinta y la fallada vuelve en la pasada siguiente
+
+# EC-47 — Origen: RF-26, RF-30
+Escenario: Progreso por mazo
+  Dado que una palabra está en dos mazos y está aprendida solo en uno
+  Cuando elijo cada mazo en la pantalla de progreso
+  Entonces aparece aprendida en uno y pendiente en el otro
+
+# EC-48 — Origen: RF-16, RF-20
+Escenario: Nombres de mazo inválidos
+  Dado que creo o renombro un mazo
+  Cuando el nombre está vacío, repite uno existente (sin distinguir mayúsculas ni acentos) o supera 60 caracteres
+  Entonces no se guarda y se indica el motivo
+
+Escenario: Búsqueda de mazo sin distinguir acentos
+  Dado que existe el mazo "Árboles"
+  Cuando busco "arb"
+  Entonces el mazo aparece entre los resultados
+
+# EC-49 — Origen: RF-42
+Escenario: Preferencias de apariencia en otro dispositivo
+  Dado que elegí tema, paleta y lado de la imagen
+  Cuando abro la app en otro dispositivo con mi cuenta
+  Entonces se aplican mis preferencias desde el primer pintado
+
+# EC-50 — Origen: RF-37
+Escenario: Solicitudes repetidas de enlace
+  Dado que acabo de pedir un enlace de acceso
+  Cuando intento pedir otro antes de 60 segundos
+  Entonces la opción está deshabilitada con una cuenta regresiva anunciada
+  Y al pedir uno nuevo después, el anterior deja de ser válido
+```
+
 ---
 
 ## 3. Vacíos detectados en `specs.md`: resueltos (2026-10-10)
@@ -673,5 +764,8 @@ Los nueve vacíos de la primera versión de este backlog se resolvieron en `spec
 | RF-18 | HU-08 | RF-36 | HU-08, EC-17, EC-18 |
 | RF-37 | EC-03 | RF-38 | HU-05, EC-10, EC-11 |
 | RF-39 | HU-06, EC-13 | RF-40 | HU-08 |
+| RF-41 | EC-42, EC-43 | RF-42 | EC-49 |
+
+**RF ampliados por la resolución de NEC:** RF-16, RF-20 (EC-48); RF-26 (EC-47); RF-29 (EC-38 a EC-41); RF-31 (EC-46); RF-36 (EC-44, EC-45); RF-37 (EC-50).
 
 **Requisitos no funcionales** (WCAG AA, tokens, estados vacío/carga/error, PWA, no depender solo del color): se heredan de CLAUDE.md y no tienen historia propia; los casos que los ejercen son EC-35, EC-36, EC-20, EC-27 y el último escenario de HU-09.

@@ -2,7 +2,7 @@
 
 > Única fuente de verdad del proyecto. Fecha: 2026-10-10.
 >
-> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog). `CLAUDE.md` = instrucciones del proyecto.
+> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas). `CLAUDE.md` = instrucciones del proyecto.
 > **[PENDIENTE]** = vacío sin resolver; no se asume nada.
 
 ## 1. Objetivos
@@ -67,38 +67,40 @@
 | RF-06 | Si el usuario acierta, la app suma 1 al contador de aciertos consecutivos de esa palabra y la tarjeta vuelve a mostrarse. | (T-5, R1) |
 | RF-07 | Cuando una palabra alcanza 3 aciertos consecutivos se considera aprendida y pasa al backlog de palabras aprendidas. | (T-5, R1) |
 | RF-08 | El usuario puede agregar las palabras que quiere aprender. | (T-7) |
-| RF-09 | El acceso es por email mediante enlace mágico, sin contraseña. El email identifica de forma única al usuario. | (T-7, R2) |
-| RF-10 | La app ofrece tema en azul, tema en blanco y modo oscuro. | (T-7) |
+| RF-09 | El acceso es por email mediante enlace mágico, sin contraseña. El email identifica de forma única al usuario. Tras el primer acceso, la sesión persiste sin conexión; ver RF-41. | (T-7, R2, R35) |
+| RF-10 | La app ofrece tema en azul, tema en blanco y modo oscuro. Las preferencias de apariencia se sincronizan con la cuenta (RF-42). | (T-7, R40) |
 | RF-11 | El usuario puede personalizar la paleta de colores del fondo y de las flashcards eligiendo entre presets predefinidos que cumplen WCAG AA; no hay selección de color libre. | (T-7, R6) |
 | RF-12 | Una preferencia global del usuario define si la imagen se muestra en el frente, en el reverso o en ambos lados de las tarjetas. | (T-9, R4) |
-| RF-13 | La reaparición de las tarjetas funciona con una cola simple y el contador de aciertos; sin fechas de repaso ni intervalos. | (R3, R15) |
+| RF-13 | La reaparición de las tarjetas funciona con una cola simple y el contador de aciertos; sin fechas de repaso ni intervalos. Ver RF-31 para el orden de las pasadas. | (R3, R15, R37) |
 | RF-14 | Las imágenes ya vistas se cachean para poder mostrarse sin conexión. Una imagen nunca vista y sin conexión se omite sin error (la tarjeta se estudia sin imagen) y se carga al recuperar la conexión. | (R5, R30) |
 | RF-15 | Al asociar una imagen se valida que la URL sea http(s) y que cargue como imagen. Sin conexión no se puede validar: la URL se guarda como "sin verificar" con un aviso visible y se valida al recuperar la conexión; si falla, se retira la imagen y se avisa al usuario. | (R5, R25) |
-| RF-16 | La app permite varios mazos; la lista de mazos aparece a la izquierda. | (R7) |
+| RF-16 | La app permite varios mazos; la lista de mazos aparece a la izquierda. El nombre de un mazo es obligatorio (recortado), único sin distinguir mayúsculas ni acentos y de máximo 60 caracteres; si no cumple, no se guarda y se indica el motivo. | (R7, R39) |
 | RF-17 | El usuario escribe una palabra con su traducción e imagen; la palabra creada aparece en el panel derecho (ver RF-33 y RF-34). | (R7) |
 | RF-18 | El usuario puede arrastrar una palabra del panel derecho al mazo donde quiere agregarla. | (R7) |
 | RF-19 | El usuario puede editar o borrar palabras individuales y mazos completos. Antes de borrar se muestra un diálogo de confirmación; el borrado es definitivo. Borrar una palabra que está en varios mazos la elimina de todos ellos junto con su progreso; el diálogo de confirmación indica en cuántos mazos está. | (R7, R9, R26) |
-| RF-20 | El usuario también puede agregar una palabra a un mazo seleccionándola y eligiendo el mazo en un menú desplegable con búsqueda predictiva. | (R7) |
+| RF-20 | El usuario también puede agregar una palabra a un mazo seleccionándola y eligiendo el mazo en un menú desplegable con búsqueda predictiva. La búsqueda predictiva ignora mayúsculas y acentos y busca por subcadena. | (R7, R39) |
 | RF-21 | Sin conexión, el progreso se guarda localmente. | (R8, R13) |
 | RF-22 | Al recuperar la conexión, la app sincroniza lo pendiente. Si la sincronización falla, los cambios locales nunca se descartan: se reintenta automáticamente con espera creciente (máximo 5 reintentos) y al recuperar la conexión; la app muestra un indicador "sin sincronizar" y un botón "Reintentar". Las operaciones de sincronización son idempotentes. | (R8, R28) |
 | RF-23 | Una palabra puede pertenecer a varios mazos. | (R10) |
 | RF-24 | Al borrar un mazo, sus palabras se conservan y quedan sin mazo, visibles en el panel derecho como palabras sin mazo (RF-33, RF-34). | (R10) |
 | RF-25 | El usuario estudia por mazo, solo en dirección inglés → español. | (R11) |
-| RF-26 | Una pantalla de progreso muestra contadores y listas de palabras pendientes y aprendidas. | (R12) |
+| RF-26 | Una pantalla de progreso muestra contadores y listas de palabras pendientes y aprendidas. El progreso se muestra por mazo, con un selector de mazo; una palabra que está en dos mazos cuenta en cada uno; las palabras sin mazo no tienen progreso. | (R12, R38) |
 | RF-27 | El usuario puede reactivar una palabra aprendida; vuelve a pendientes de ese mazo con el contador de aciertos consecutivos en 0. | (R12, R27) |
 | RF-28 | Estudiar, agregar y editar palabras funciona sin conexión. | (R13) |
-| RF-29 | La cuenta puede usarse en varios dispositivos; si hay conflicto al sincronizar, prevalece el cambio más reciente. | (R13) |
+| RF-29 | La cuenta puede usarse en varios dispositivos; si hay conflicto al sincronizar, prevalece el cambio más reciente. La marca de tiempo que decide el conflicto la asigna el servidor al sincronizar (la hora del cliente es solo informativa). Los campos de texto (inglés, español, imagen, ejemplo, nota) se resuelven por campo: gana el cambio más reciente en cada campo. El progreso se sincroniza como eventos de acierto/fallo en orden y el contador y estado se recalculan, sin perder lo estudiado en otro dispositivo. Si una palabra o mazo se borró en un dispositivo, el borrado prevalece sobre ediciones o progreso concurrentes. | (R13, R31, R32, R33, R34) |
 | RF-30 | El contador de aciertos consecutivos y el estado (pendiente o aprendida) se llevan por palabra dentro de cada mazo. | (R14) |
-| RF-31 | Las tarjetas pendientes de un mazo se presentan en orden aleatorio. | (R15) |
+| RF-31 | Las tarjetas pendientes de un mazo se presentan en orden aleatorio. Las pendientes se barajan en pasadas: las falladas vuelven en la pasada siguiente, con nuevo barajado; con 2 o más pendientes no se muestra la misma tarjeta dos veces seguidas. | (R15, R37) |
 | RF-32 | Una tarjeta admite un ejemplo de uso opcional y una nota libre opcional. | (R16) |
 | RF-33 | Con un mazo seleccionado, el panel derecho lista todas las palabras en tres grupos y en este orden: 1º las del mazo seleccionado (resaltadas), 2º las asignadas solo a otros mazos (otro color), 3º las sin ningún mazo (un tercer color). | (R18) |
 | RF-34 | Sin mazo seleccionado, el panel derecho lista todas las palabras; las que no están en ningún mazo se resaltan con un color distinto y van al final. | (R19) |
 | RF-35 | Cada mazo tiene un botón "Estudiar" que inicia la sesión; la sesión no tiene límite de tamaño y continúa hasta agotar las pendientes o que el usuario salga. | (R20) |
-| RF-36 | No se permite agregar la misma palabra dos veces al mismo mazo; se bloquea y se muestra un aviso. | (R21) |
-| RF-37 | El enlace mágico caduca a la hora y es de un solo uso: se invalida al usarse o al solicitar uno nuevo. Un enlace caducado, usado o alterado no inicia sesión, muestra un mensaje claro y permite solicitar un enlace nuevo. | (R22) |
+| RF-36 | No se permite agregar la misma palabra dos veces al mismo mazo; se bloquea y se muestra un aviso. Dos palabras se consideran la misma si su término en inglés coincide sin distinguir mayúsculas ni espacios sobrantes. Al crear una palabra cuyo inglés ya existe se avisa y se permite continuar. | (R21, R36) |
+| RF-37 | El enlace mágico caduca a la hora y es de un solo uso: se invalida al usarse o al solicitar uno nuevo. Un enlace caducado, usado o alterado no inicia sesión, muestra un mensaje claro y permite solicitar un enlace nuevo. Tras pedir un enlace, el botón queda deshabilitado 60 s con cuenta regresiva anunciada; el enlace anterior se invalida al emitir uno nuevo. | (R22, R41) |
 | RF-38 | Cuando se agotan las pendientes durante una sesión, o se intenta estudiar un mazo sin pendientes, la app muestra un mensaje con el resumen de la sesión (aciertos y fallos; si no hubo sesión, solo el aviso) y dos acciones: "Reactivar palabras" (lleva a la pantalla de progreso) y "Volver a mazos". No se inicia una sesión vacía. | (R23) |
 | RF-39 | Para crear una palabra son obligatorios el término en inglés y la traducción al español, no vacíos tras recortar espacios; imagen, ejemplo y nota son opcionales. Si falta un campo obligatorio, no se crea y se indica cuál falta. | (R24) |
 | RF-40 | El usuario puede quitar una palabra de un mazo sin borrarla. Su progreso en ese mazo se elimina; si se vuelve a agregar al mazo, empieza con el contador en 0. | (R29) |
+| RF-41 | La sesión iniciada se mantiene sin conexión; solo el primer acceso requiere red. Cerrar sesión con cambios sin sincronizar pide confirmación y advierte de la pérdida de datos. | (R35) |
+| RF-42 | Tema, paleta y lado de la imagen se guardan con la cuenta, funcionan sin conexión y se aplican antes del primer pintado; antes de iniciar sesión se usa la preferencia del sistema (claro u oscuro). En conflicto gana el cambio más reciente (RF-29). | (R40) |
 
 ## 6. Requisitos no funcionales
 Se heredan sin cambios de CLAUDE.md; no añaden funcionalidad.
@@ -131,6 +133,17 @@ Se heredan sin cambios de CLAUDE.md; no añaden funcionalidad.
 | P-18 | ~~Sincronización fallida (V-07)~~ | Resuelto en R28 (RF-22). |
 | P-19 | ~~Quitar palabra de un mazo (V-08)~~ | Resuelto en R29 (RF-40). |
 | P-20 | ~~Imágenes nunca vistas offline (V-09)~~ | Resuelto en R30 (RF-14). |
+| P-21 | ~~Marca de tiempo de conflictos (NEC-01)~~ | Resuelto en R31 (RF-29). |
+| P-22 | ~~Conflicto por campo (NEC-02)~~ | Resuelto en R32 (RF-29). |
+| P-23 | ~~Conflicto de progreso (NEC-03)~~ | Resuelto en R33 (RF-29). |
+| P-24 | ~~Editar vs. borrar (NEC-04)~~ | Resuelto en R34 (RF-29). |
+| P-25 | ~~Sesión offline y cierre de sesión (NEC-10)~~ | Resuelto en R35 (RF-41). |
+| P-26 | ~~Identidad de palabra duplicada (NEC-13)~~ | Resuelto en R36 (RF-36). |
+| P-27 | ~~Orden de la cola (NEC-20)~~ | Resuelto en R37 (RF-31). |
+| P-28 | ~~Progreso por mazo (NEC-21)~~ | Resuelto en R38 (RF-26). |
+| P-29 | ~~Nombres de mazo (NEC-23)~~ | Resuelto en R39 (RF-16, RF-20). |
+| P-30 | ~~Preferencias sincronizadas (NEC-25)~~ | Resuelto en R40 (RF-42). |
+| P-31 | ~~Límite de enlaces (NEC-27)~~ | Resuelto en R41 (RF-37). |
 
 No quedan [PENDIENTE] abiertos al 2026-10-10.
 
@@ -167,3 +180,14 @@ No quedan [PENDIENTE] abiertos al 2026-10-10.
 | 2026-10-10 | Sync fallida: sin pérdida local, reintentos automáticos (máx. 5), indicador y botón. | R28 (P-18, V-07). |
 | 2026-10-10 | Nueva acción "quitar del mazo"; borra su progreso en ese mazo. | R29 (P-19, V-08); amplía alcance de In-Scope. |
 | 2026-10-10 | Imagen nunca vista sin conexión: se omite sin error. | R30 (P-20, V-09). |
+| 2026-10-10 | Marca de tiempo del conflicto: la asigna el servidor al sincronizar. | R31 (P-21); Inmune a relojes mal ajustados; matiza RF-29. |
+| 2026-10-10 | Conflicto de texto resuelto por campo. | R32 (P-22); Editar campos distintos no se pisa. |
+| 2026-10-10 | Progreso sincronizado como eventos ordenados; contador y estado recalculados. | R33 (P-23); No se pierde lo estudiado en otro dispositivo. |
+| 2026-10-10 | El borrado prevalece sobre ediciones o progreso concurrentes. | R34 (P-24); Coherente con borrado definitivo (RF-19). |
+| 2026-10-10 | Sesión persistente offline; cierre de sesión con pendientes pide confirmación. | R35 (P-25); Compatibiliza RF-09 con RF-28. |
+| 2026-10-10 | Palabra duplicada = mismo inglés normalizado; al crear, aviso sin bloqueo. | R36 (P-26); Permite varias traducciones de una misma palabra. |
+| 2026-10-10 | Cola en pasadas barajadas sin repetir la misma tarjeta seguida (con 2 o más pendientes). | R37 (P-27); Mejora la retención sin fechas (RF-13). |
+| 2026-10-10 | Progreso por mazo con selector. | R38 (P-28); Coherente con RF-30. |
+| 2026-10-10 | Nombres de mazo: obligatorios, únicos, máximo 60; búsqueda sin mayúsculas ni acentos. | R39 (P-29); Evita ambigüedad en el menú de RF-20. |
+| 2026-10-10 | Preferencias de apariencia sincronizadas con la cuenta y aplicadas antes del primer pintado. | R40 (P-30); Experiencia consistente entre dispositivos (RF-29). |
+| 2026-10-10 | Enlace mágico: 60 s entre solicitudes. | R41 (P-31); Evita abuso y dobles envíos. |
