@@ -65,6 +65,31 @@
   animation: entrar var(--mov-rapido) var(--mov-curva) both;
 }
 
+/* RF-45: reacción del mazo al recibir una palabra (anillo que se expande y se desvanece)
+   y de la fila al agregarla con el menú. */
+@keyframes pulso-anillo {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+@keyframes pulso-contador {
+  40% {
+    transform: scale(1.35);
+  }
+}
+@utility anim-pulso-anillo {
+  animation: pulso-anillo var(--mov-deposito) var(--mov-curva) both;
+}
+@utility anim-pulso-contador {
+  display: inline-block;
+  animation: pulso-contador var(--mov-deposito) var(--mov-curva) both;
+}
+
 /* Cambio de tema o paleta: el script de PrefsContext añade esta clase solo durante el cambio. */
 .cambiando-tema,
 .cambiando-tema *,

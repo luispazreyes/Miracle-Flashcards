@@ -1,6 +1,6 @@
 // RF-44 — animaciones de transición (HU-16, TC-16.x, TC-EC-53..55).
 // Las duraciones se simulan a 240 ms para poder observar las salidas; con movimiento reducido valen 0.
-import { act, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
@@ -161,9 +161,9 @@ const tokens = readFileSync(join(src, 'styles/tokens.css'), 'utf8')
 describe('RF-44 tokens de motion', () => {
   it('las utilidades de animación usan solo tokens --mov-*', () => {
     const utilidades = [...css.matchAll(/@utility anim-[\w-]+ \{([^}]*)\}/g)].map((m) => m[1])
-    expect(utilidades.length).toBeGreaterThanOrEqual(7)
+    expect(utilidades.length).toBeGreaterThanOrEqual(9)
     for (const u of utilidades) {
-      expect(u).toMatch(/var\(--mov-(rapido|medio|volteo)\)/)
+      expect(u).toMatch(/var\(--mov-(rapido|medio|volteo|deposito)\)/)
       expect(u).toMatch(/var\(--mov-curva\)/)
       expect(u).not.toMatch(/\d+(\.\d+)?m?s\b/)
     }
@@ -178,9 +178,97 @@ describe('RF-44 tokens de motion', () => {
 
   it('con movimiento reducido las duraciones valen ~0 y no hay desplazamiento ni escala (TC-16.5)', () => {
     const bloque = tokens.slice(tokens.indexOf('@media (prefers-reduced-motion: reduce)'))
-    for (const t of ['--mov-rapido', '--mov-medio', '--mov-volteo']) expect(bloque).toMatch(new RegExp(`${t}:\\s*0\\.01ms`))
+    for (const t of ['--mov-rapido', '--mov-medio', '--mov-volteo', '--mov-deposito']) expect(bloque).toMatch(new RegExp(`${t}:\\s*0\\.01ms`))
     expect(bloque).toMatch(/--mov-distancia:\s*0rem/)
     expect(bloque).toMatch(/--mov-escala-entrada:\s*1;/)
+    expect(bloque).toMatch(/--mov-escala-elevada:\s*1;/)
     expect(css).toMatch(/prefers-reduced-motion: reduce[\s\S]*animation-duration: 0\.01ms !important/)
+  })
+})
+
+// --- RF-45: arrastre y depósito de palabras (HU-17, TC-17.x, TC-EC-56..59) ---
+const dt = () => ({ setData: vi.fn(), setDragImage: vi.fn(), effectAllowed: '', dropEffect: 'copy' })
+const filaDe = (nombre: string) => document.querySelector<HTMLElement>(`[data-palabra-id="${nombre}"]`)!
+const mazoDe = (id: string) => document.querySelector<HTMLElement>(`[data-mazo-id="${id}"]`)!
+const hayAnillo = (el: HTMLElement) => !!el.querySelector('.anim-pulso-anillo')
+
+describe('RF-45 arrastre y depósito', () => {
+  it('al arrastrar, la fila queda como hueco y el mazo bajo la palabra se resalta con texto (TC-17.1, TC-17.2)', async () => {
+    montar('/mazos')
+    const fila = filaDe('p-b')
+    const datos = dt()
+    fireEvent.dragStart(fila, { dataTransfer: datos })
+    await avanzar(10)
+    expect(datos.setDragImage).toHaveBeenCalled() // copia elevada que sigue al puntero
+    expect(fila).toHaveAttribute('data-arrastrando')
+    const mazo = mazoDe('m-3')
+    expect(within(mazo).queryByText('Suelta aquí')).not.toBeInTheDocument()
+    fireEvent.dragOver(mazo, { dataTransfer: datos })
+    expect(within(mazo).getByText('Suelta aquí')).toBeInTheDocument() // no depende solo del color
+    fireEvent.dragLeave(mazo, { dataTransfer: datos, relatedTarget: document.body })
+    expect(within(mazo).queryByText('Suelta aquí')).not.toBeInTheDocument()
+    fireEvent.dragEnd(fila, { dataTransfer: { ...datos, dropEffect: 'none' } })
+    expect(fila).not.toHaveAttribute('data-arrastrando')
+  })
+
+  it('al soltar, la palabra se agrega, se avisa con texto y el mazo reacciona (TC-17.3, TC-EC-58)', async () => {
+    montar('/mazos')
+    const datos = dt()
+    fireEvent.dragStart(filaDe('p-b'), { dataTransfer: datos })
+    const mazo = mazoDe('m-3')
+    expect(hayAnillo(mazo)).toBe(false)
+    fireEvent.dragOver(mazo, { dataTransfer: datos })
+    fireEvent.drop(mazo, { dataTransfer: datos, clientX: 10, clientY: 10 })
+    await avanzar(20)
+    expect(screen.getByText('«Palabra B» agregada a «Mazo 3».')).toBeInTheDocument()
+    expect(hayAnillo(mazo)).toBe(true)
+    expect(within(mazo).getByText('1 palabra')).toBeInTheDocument()
+  })
+
+  it('un duplicado se bloquea y avisa, sin pulso de depósito (TC-17.5)', async () => {
+    montar('/mazos')
+    const datos = dt()
+    fireEvent.dragStart(filaDe('p-a'), { dataTransfer: datos })
+    const mazo = mazoDe('m-1')
+    fireEvent.dragOver(mazo, { dataTransfer: datos })
+    fireEvent.drop(mazo, { dataTransfer: datos, clientX: 10, clientY: 10 })
+    await avanzar(20)
+    expect(screen.getByText('«Palabra A» ya está en este mazo.')).toBeInTheDocument()
+    expect(hayAnillo(mazo)).toBe(false)
+  })
+
+  it('soltar fuera de un mazo no cambia nada (TC-17.4, TC-EC-56)', async () => {
+    montar('/mazos')
+    const datos = dt()
+    const fila = filaDe('p-b')
+    fireEvent.dragStart(fila, { dataTransfer: datos })
+    await avanzar(10)
+    fireEvent.dragEnd(fila, { dataTransfer: { ...datos, dropEffect: 'none' }, clientX: 5, clientY: 5 })
+    await avanzar(20)
+    expect(document.querySelector('.anim-pulso-anillo')).toBeNull()
+    expect(screen.queryByText(/agregada a/)).not.toBeInTheDocument()
+  })
+
+  it('agregar con el menú desplegable también anima el depósito (TC-17.6)', async () => {
+    const u = usuario()
+    montar('/mazos')
+    await u.click(screen.getByRole('button', { name: 'Agregar «Palabra B» a mazo' }))
+    await u.click(await screen.findByRole('option', { name: /Mazo 3/ }))
+    await avanzar(20)
+    expect(screen.getByText('«Palabra B» agregada a «Mazo 3».')).toBeInTheDocument()
+    expect(hayAnillo(mazoDe('m-3'))).toBe(true)
+    expect(filaDe('p-b').querySelector('.anim-pulso-anillo')).not.toBeNull()
+  })
+
+  it('arrastres consecutivos con la animación en curso no pierden ni duplican (TC-EC-59)', async () => {
+    montar('/mazos')
+    for (const id of ['p-b', 'p-c']) {
+      const datos = dt()
+      fireEvent.dragStart(filaDe(id), { dataTransfer: datos })
+      fireEvent.dragOver(mazoDe('m-3'), { dataTransfer: datos })
+      fireEvent.drop(mazoDe('m-3'), { dataTransfer: datos, clientX: 1, clientY: 1 })
+    }
+    await avanzar(20)
+    expect(within(mazoDe('m-3')).getByText('2 palabras')).toBeInTheDocument()
   })
 })

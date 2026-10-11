@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Tabs, idPanel, idTab } from '../../components/Tabs'
 import { useToast } from '../../components/Toast'
+import { volarFicha } from '../../lib/motion'
 import { useTitulo } from '../../lib/texto'
 import { useData, type Palabra } from '../../state/DataContext'
 import { PanelPalabras } from '../palabras/PanelPalabras'
@@ -30,6 +31,9 @@ export function MazosPage() {
   const [pestana, setPestana] = useState<'mazos' | 'palabras'>('mazos')
   const [arrastrando, setArrastrando] = useState<Palabra | null>(null)
   const [anuncio, setAnuncio] = useState('')
+  // Último depósito (RF-45): el mazo reacciona con un pulso cada vez que `n` cambia.
+  const [deposito, setDeposito] = useState({ mazoId: '', n: 0 })
+  const marcarDeposito = (mazoId: string) => setDeposito((d) => ({ mazoId, n: d.n + 1 }))
   const esEscritorio = useEscritorio()
 
   const idMazo = params.get('mazo')
@@ -42,14 +46,20 @@ export function MazosPage() {
     if (!esEscritorio) setPestana('palabras')
   }
 
-  function soltar(mazoId: string) {
+  function soltar(mazoId: string, punto: { x: number; y: number }) {
     if (!arrastrando) return
     const mazo = data.mazos.find((m) => m.id === mazoId)
     if (!mazo) return
-    if (data.agregarAMazo(arrastrando.id, mazoId) === 'duplicado') {
-      avisar(`«${arrastrando.ingles}» ya está en este mazo.`, 'error')
+    const palabra = arrastrando
+    // El resultado se aplica y se anuncia con texto al instante; la ficha que vuela es solo decoración (RF-45).
+    if (data.agregarAMazo(palabra.id, mazoId) === 'duplicado') {
+      avisar(`«${palabra.ingles}» ya está en este mazo.`, 'error')
+      const fila = document.querySelector<HTMLElement>(`[data-palabra-id="${palabra.id}"]`)
+      void volarFicha(palabra.ingles, punto, fila, false)
     } else {
-      avisar(`«${arrastrando.ingles}» agregada a «${mazo.nombre}».`)
+      avisar(`«${palabra.ingles}» agregada a «${mazo.nombre}».`)
+      const destino = document.querySelector<HTMLElement>(`[data-mazo-id="${mazoId}"]`)
+      void volarFicha(palabra.ingles, punto, destino, true).then(() => marcarDeposito(mazoId))
     }
     setArrastrando(null)
   }
@@ -89,6 +99,7 @@ export function MazosPage() {
             onSeleccionar={seleccionar}
             arrastrando={!!arrastrando}
             onSoltar={soltar}
+            deposito={deposito}
           />
         </div>
         <div
@@ -102,6 +113,7 @@ export function MazosPage() {
             esEscritorio={esEscritorio}
             onArrastreInicio={setArrastrando}
             onArrastreFin={() => setArrastrando(null)}
+            onDepositado={marcarDeposito}
             anunciar={setAnuncio}
           />
         </div>

@@ -18,6 +18,8 @@ interface Props {
   esEscritorio: boolean
   onArrastreInicio: (palabra: Palabra) => void
   onArrastreFin: () => void
+  /** Se agregó una palabra a un mazo con el menú (RF-20): la página anima el depósito en el mazo (RF-45). */
+  onDepositado: (mazoId: string) => void
   /** Avisos asistivos (aria-live) de la página. */
   anunciar: (texto: string) => void
 }
@@ -29,7 +31,7 @@ const GRUPOS: Record<Grupo, { titulo: string; icono: IconName; fondo: string }> 
   sin: { titulo: 'Sin mazo', icono: 'guion', fondo: 'bg-grupo-sin' },
 }
 
-export function PanelPalabras({ mazoId, esEscritorio, onArrastreInicio, onArrastreFin, anunciar }: Props) {
+export function PanelPalabras({ mazoId, esEscritorio, onArrastreInicio, onArrastreFin, onDepositado, anunciar }: Props) {
   const data = useData()
   const { avisar } = useToast()
   const [busqueda, setBusqueda] = useState('')
@@ -38,6 +40,8 @@ export function PanelPalabras({ mazoId, esEscritorio, onArrastreInicio, onArrast
   const [aQuitar, setAQuitar] = useState<Palabra | null>(null)
   // Fila que está saliendo con transición (RF-44) antes de aplicar el cambio de datos.
   const [saliendo, setSaliendo] = useState<string | null>(null)
+  // Fila que pulsa al agregarla con el menú (RF-45): `n` cambia en cada depósito para repetir el pulso.
+  const [pulsoFila, setPulsoFila] = useState<{ id: string; n: number }>({ id: '', n: 0 })
   const conSalida = (id: string, cambio: () => void) => {
     setSaliendo(id)
     esperarSalida(() => {
@@ -70,6 +74,8 @@ export function PanelPalabras({ mazoId, esEscritorio, onArrastreInicio, onArrast
       anunciar(`«${p.ingles}» ya está en «${destino.nombre}».`)
     } else {
       avisar(`«${p.ingles}» agregada a «${destino.nombre}».`)
+      setPulsoFila((a) => ({ id: p.id, n: a.n + 1 }))
+      onDepositado(destino.id)
     }
   }
 
@@ -100,6 +106,7 @@ export function PanelPalabras({ mazoId, esEscritorio, onArrastreInicio, onArrast
       onAgregar={(destino) => agregar(p, destino)}
       acciones={accionesDe(p)}
       saliendo={saliendo === p.id}
+      pulso={pulsoFila.id === p.id ? pulsoFila.n : 0}
     />
   )
 

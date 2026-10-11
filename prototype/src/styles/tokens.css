@@ -50,6 +50,7 @@
   --mov-rapido: 120ms;
   --mov-medio: 240ms;
   --mov-volteo: 400ms;
+  --mov-deposito: 300ms;
   --mov-curva: cubic-bezier(0.2, 0, 0, 1);
   --default-transition-duration: var(--mov-rapido);
   --default-transition-timing-function: var(--mov-curva);
@@ -69,6 +70,8 @@
   /* Motion (RF-44): recorrido y escala de las entradas; con movimiento reducido valen 0 y 1 */
   --mov-distancia: 0.5rem;
   --mov-escala-entrada: 0.96;
+  /* RF-45: palabra elevada durante el arrastre; con movimiento reducido vale 1 */
+  --mov-escala-elevada: 1.03;
 }
 
 [data-tema='azul'] {
@@ -109,12 +112,15 @@
     --mov-rapido: 0.01ms;
     --mov-medio: 0.01ms;
     --mov-volteo: 0.01ms;
+    --mov-deposito: 0.01ms;
   }
   :root {
     --mov-rapido: 0.01ms;
     --mov-medio: 0.01ms;
     --mov-volteo: 0.01ms;
+    --mov-deposito: 0.01ms;
     --mov-distancia: 0rem;
     --mov-escala-entrada: 1;
+    --mov-escala-elevada: 1;
   }
 }

@@ -17,10 +17,12 @@ interface Props {
   onSeleccionar: (id: string | null) => void
   /** Hay una palabra arrastrándose: los mazos son destinos de soltado. */
   arrastrando: boolean
-  onSoltar: (mazoId: string) => void
+  onSoltar: (mazoId: string, punto: { x: number; y: number }) => void
+  /** Último depósito (RF-45): `n` cambia en cada uno para repetir la reacción del mazo. */
+  deposito: { mazoId: string; n: number }
 }
 
-export function ListaMazos({ seleccionado, onSeleccionar, arrastrando, onSoltar }: Props) {
+export function ListaMazos({ seleccionado, onSeleccionar, arrastrando, onSoltar, deposito }: Props) {
   const data = useData()
   const { avisar } = useToast()
   const navigate = useNavigate()
@@ -35,6 +37,7 @@ export function ListaMazos({ seleccionado, onSeleccionar, arrastrando, onSoltar 
   const [errorRenombre, setErrorRenombre] = useState<string>()
   const [borrando, setBorrando] = useState<Mazo | null>(null)
   const [saliendo, setSaliendo] = useState<string | null>(null) // fila que sale con transición (RF-44)
+  const [sobre, setSobre] = useState<string | null>(null) // mazo bajo la palabra arrastrada (RF-45)
 
   function crear(e: FormEvent) {
     e.preventDefault()
@@ -154,15 +157,35 @@ export function ListaMazos({ seleccionado, onSeleccionar, arrastrando, onSoltar 
             return (
               <li
                 key={m.id}
-                onDragOver={(e) => arrastrando && e.preventDefault()}
+                data-mazo-id={m.id}
+                onDragOver={(e) => {
+                  if (!arrastrando) return
+                  e.preventDefault()
+                  setSobre(m.id)
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setSobre(null)
+                }}
                 onDrop={(e) => {
                   e.preventDefault()
-                  onSoltar(m.id)
+                  setSobre(null)
+                  onSoltar(m.id, { x: e.clientX, y: e.clientY })
                 }}
-                className={`${saliendo === m.id ? "anim-salida pointer-events-none" : "anim-entrada"} flex items-stretch rounded-md border-2 ${
-                  arrastrando ? 'border-dashed border-primario' : claseSel(activo)
+                className={`${saliendo === m.id ? "anim-salida pointer-events-none" : "anim-entrada"} relative flex items-stretch rounded-md border-2 transition-[border-color,background-color,transform] ${
+                  arrastrando && sobre === m.id
+                    ? 'scale-[1.02] border-solid border-primario bg-grupo-mazo'
+                    : arrastrando
+                      ? 'border-dashed border-primario'
+                      : claseSel(activo)
                 } ${activo ? 'bg-grupo-mazo' : ''}`}
               >
+                {deposito.mazoId === m.id && deposito.n > 0 && (
+                  <span
+                    key={deposito.n}
+                    aria-hidden="true"
+                    className="anim-pulso-anillo pointer-events-none absolute inset-0 rounded-md border-2 border-exito"
+                  />
+                )}
                 <button
                   type="button"
                   data-sel
@@ -174,7 +197,20 @@ export function ListaMazos({ seleccionado, onSeleccionar, arrastrando, onSoltar 
                     {activo && <Icon name="checkcirculo" />}
                     <span className="break-words">{m.nombre}</span>
                   </span>
-                  <span className="text-sm text-texto-suave">{plural(n, 'palabra', 'palabras')}</span>
+                  <span className="text-sm text-texto-suave">
+                    {arrastrando && sobre === m.id ? (
+                      <span className="flex items-center gap-1 font-semibold text-texto">
+                        <Icon name="mascircular" className="size-4" />
+                        Suelta aquí
+                      </span>
+                    ) : deposito.mazoId === m.id && deposito.n > 0 ? (
+                      <span key={deposito.n} className="anim-pulso-contador">
+                        {plural(n, 'palabra', 'palabras')}
+                      </span>
+                    ) : (
+                      plural(n, 'palabra', 'palabras')
+                    )}
+                  </span>
                 </button>
                 <div className="flex items-center gap-1 pr-1">
                   <button

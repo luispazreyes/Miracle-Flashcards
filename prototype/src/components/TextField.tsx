@@ -24,7 +24,7 @@ export function TextField({ etiqueta, ayuda, error, inputRef, className = '', ..
         ref={inputRef}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={`objetivo-min rounded-md border bg-fondo px-3 py-2 text-base text-texto ${
+        className={`objetivo-min rounded-md border bg-fondo px-3 py-2 text-base text-texto transition-colors ${
           error ? 'border-error border-2' : 'border-borde'
         } ${className}`}
       />
