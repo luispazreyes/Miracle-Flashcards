@@ -370,6 +370,38 @@ Escenario: Restaurar la lista
   Entonces vuelve a verse la lista completa
 ```
 
+### HU-16 — Interfaz con transiciones
+**Como** estudiante **quiero** que la app responda con transiciones suaves **para** que no se sienta plana ni aburrida y entender qué cambia en pantalla.
+**Origen:** RF-44
+
+```gherkin
+Escenario: Transiciones en las acciones principales
+  Dado que uso la app con la preferencia de movimiento normal
+  Cuando volteo una tarjeta, paso a la siguiente, abro o cierro un diálogo o menú, o cambio de pantalla
+  Entonces el cambio se presenta con una transición breve y sutil
+
+Escenario: Elementos que aparecen y desaparecen
+  Dado que veo una lista de mazos, palabras o progreso
+  Cuando se agrega, se quita o se mueve un elemento, o aparece un aviso
+  Entonces la entrada o la salida del elemento se anima
+
+Escenario: Cambio de tema o de paleta
+  Dado que elijo otro tema o paleta
+  Cuando se aplica
+  Entonces los colores cambian con una transición y no de golpe
+
+Escenario: Estado de sincronización
+  Dado que la barra muestra el estado de sincronización
+  Cuando el estado cambia
+  Entonces el cambio se presenta con una transición, además de su texto e icono
+
+Escenario: Movimiento reducido
+  Dado que mi sistema pide reducir el movimiento
+  Cuando uso cualquiera de las acciones anteriores
+  Entonces los cambios son instantáneos, sin movimiento ni rotación
+  Y no pierdo ninguna información
+```
+
 ---
 
 ## 2. Edge cases y escenarios de fallo
@@ -763,6 +795,28 @@ Escenario: Buscar sin conexión y con espacios sobrantes
   Entonces la búsqueda funciona igualmente y encuentra las palabras que contienen "dog"
 ```
 
+### Transiciones (HU-16)
+```gherkin
+# EC-53 — Origen: RF-44
+Escenario: Las transiciones no retrasan ni bloquean la interacción
+  Dado que una transición está en curso
+  Cuando actúo de nuevo, por ejemplo al responder rápido varias tarjetas seguidas
+  Entonces la app responde de inmediato y el resultado final es el correcto
+  Y ninguna acción queda bloqueada hasta que termine la animación
+
+# EC-54 — Origen: RF-44, WCAG
+Escenario: La información no depende de la animación
+  Dado que una transición comunica un cambio, como acierto, fallo o sincronización
+  Cuando el movimiento está reducido o no llego a ver la animación
+  Entonces el cambio también se comunica con texto o icono, y con anuncio para lectores de pantalla
+
+# EC-55 — Origen: RF-44, RF-28
+Escenario: Transiciones sin conexión
+  Dado que no tengo conexión
+  Cuando uso la app
+  Entonces las transiciones funcionan igual que con conexión
+```
+
 ---
 
 ## 3. Vacíos detectados en `specs.md`: resueltos (2026-10-10)
@@ -808,7 +862,7 @@ Los nueve vacíos de la primera versión de este backlog se resolvieron en `spec
 | RF-37 | EC-03 | RF-38 | HU-05, EC-10, EC-11 |
 | RF-39 | HU-06, EC-13 | RF-40 | HU-08 |
 | RF-41 | EC-42, EC-43 | RF-42 | EC-49 |
-| RF-43 | HU-15, EC-51, EC-52 | | |
+| RF-43 | HU-15, EC-51, EC-52 | RF-44 | HU-16, EC-53, EC-54, EC-55 |
 
 **RF ampliados por la resolución de NEC:** RF-16, RF-20 (EC-48); RF-26 (EC-47); RF-29 (EC-38 a EC-41); RF-31 (EC-46); RF-36 (EC-44, EC-45); RF-37 (EC-50).
 

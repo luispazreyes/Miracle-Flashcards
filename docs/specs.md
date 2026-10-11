@@ -2,7 +2,7 @@
 
 > Única fuente de verdad del proyecto. Fecha: 2026-10-10.
 >
-> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas; R42: aprobación del RF-43, búsqueda en el panel de palabras, durante la revisión de `docs/prototype-spec.md`). `CLAUDE.md` = instrucciones del proyecto.
+> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas; R42: aprobación del RF-43, búsqueda en el panel de palabras, durante la revisión de `docs/prototype-spec.md`; R43: RF-44, animaciones de transición, solicitado al revisar el prototipo). `CLAUDE.md` = instrucciones del proyecto.
 > **[PENDIENTE]** = vacío sin resolver; no se asume nada.
 
 ## 1. Objetivos
@@ -28,6 +28,7 @@
 - Ejemplo de uso y nota libre opcionales en la tarjeta (R16).
 - Quitar una palabra de un mazo sin borrarla (R29).
 - Búsqueda de palabras en el panel derecho (R42).
+- Animaciones de transición en la interfaz (R43).
 
 ### Out-of-Scope (CLAUDE.md)
 - Apps nativas móviles o de escritorio; solo PWA responsive.
@@ -103,10 +104,11 @@
 | RF-41 | La sesión iniciada se mantiene sin conexión; solo el primer acceso requiere red. Cerrar sesión con cambios sin sincronizar pide confirmación y advierte de la pérdida de datos. | (R35) |
 | RF-42 | Tema, paleta y lado de la imagen se guardan con la cuenta, funcionan sin conexión y se aplican antes del primer pintado; antes de iniciar sesión se usa la preferencia del sistema (claro u oscuro). En conflicto gana el cambio más reciente (RF-29). | (R40) |
 | RF-43 | El panel derecho incluye un campo de búsqueda que filtra las palabras visibles por subcadena en inglés o español, ignorando mayúsculas y acentos. El filtro respeta los grupos de RF-33 y RF-34 (el orden se mantiene; los grupos sin coincidencias no se muestran). Sin coincidencias se muestra un aviso de "sin resultados"; al vaciar el campo se restaura la lista completa. Funciona sin conexión (RF-28). | (R42) |
+| RF-44 | La interfaz usa animaciones de transición para que la app no se vea plana: al menos en el volteo de la tarjeta (RF-02), el cambio entre tarjetas de la sesión, la apertura y cierre de diálogos, menús y avisos, la aparición y salida de elementos de las listas (palabras, mazos, aprendidas/pendientes), la navegación entre pantallas, el cambio de tema y de paleta, y los estados de la barra de sincronización (RF-22). Las transiciones son breves y sutiles (duración y curva definidas como tokens de motion), no bloquean ni retrasan la interacción y no son el único indicador de un cambio de estado. Con `prefers-reduced-motion: reduce` se sustituyen por cambios instantáneos (sin movimiento ni rotación). Funcionan sin conexión (RF-28). | (R43) |
 
 ## 6. Requisitos no funcionales
 Se heredan sin cambios de CLAUDE.md; no añaden funcionalidad.
-- Accesibilidad WCAG 2.1 AA (contraste, teclado, foco visible, ARIA, `prefers-reduced-motion`).
+- Accesibilidad WCAG 2.1 AA (contraste, teclado, foco visible, ARIA, `prefers-reduced-motion`; las animaciones de RF-44 respetan esta preferencia).
 - Design Tokens para color, tipografía, espaciado, radios, sombras y motion; sin valores hardcodeados en componentes.
 - Estados vacío/carga/error definidos; acciones destructivas con confirmación o reversibles.
 - PWA instalable y responsive.
@@ -194,3 +196,4 @@ No quedan [PENDIENTE] abiertos al 2026-10-10.
 | 2026-10-10 | Preferencias de apariencia sincronizadas con la cuenta y aplicadas antes del primer pintado. | R40 (P-30); Experiencia consistente entre dispositivos (RF-29). |
 | 2026-10-10 | Enlace mágico: 60 s entre solicitudes. | R41 (P-31); Evita abuso y dobles envíos. |
 | 2026-10-10 | Búsqueda en el panel de palabras (RF-43). | R42; mejora el uso con muchas palabras; coherente con RF-20. |
+| 2026-10-10 | Animaciones de transición en la app (RF-44), con respeto a `prefers-reduced-motion`. | R43; evita una interfaz plana y aburrida; compatible con WCAG 2.1 AA y con los tokens de motion. |

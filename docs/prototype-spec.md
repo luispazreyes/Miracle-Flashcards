@@ -23,6 +23,7 @@ Las funcionalidades de la sección C salen **solo** de `specs.md` (RF-01 a RF-42
 | F-07 | Progreso y reactivación | RF-26, RF-27, RF-30 |
 | F-08 | Apariencia y preferencias | RF-10, RF-11, RF-12, RF-42 |
 | F-09 | Offline y sincronización | RF-14, RF-21, RF-22, RF-28, RF-29, RF-41 |
+| Transversal | Animaciones de transición (catálogo en §A.5) | RF-44 |
 
 ### Navegación global
 
@@ -125,6 +126,22 @@ El texto debe poder ampliarse al 200 % sin perder contenido ni funcionalidad; us
 | `--mov-curva` | `cubic-bezier(.2,0,0,1)` | Curva estándar |
 
 Con `prefers-reduced-motion: reduce` todos los `--mov-*` valen `0.01ms` y el volteo se sustituye por un cambio instantáneo con fundido de 0 ms (sin rotación 3D).
+
+**Catálogo de transiciones (RF-44).** La app no debe verse plana: cada cambio visible de la tabla se anima con tokens de motion (nunca duraciones o curvas fijas en el componente). Son breves y sutiles, no bloquean la interacción (se puede actuar mientras corren) y no son el único indicador del cambio (texto, icono y `aria-live` siguen presentes). Con movimiento reducido todas pasan a instantáneas y sin desplazamiento.
+
+| Elemento | Transición | Duración / curva |
+|---|---|---|
+| Volteo de tarjeta (RF-02) | Rotación 3D | `--mov-volteo` / `--mov-curva` |
+| Cambio a la tarjeta siguiente (F-05) | Entrada con fundido y ligero desplazamiento; la tarjeta anterior no se retrasa (la respuesta es inmediata) | `--mov-medio` |
+| Diálogos | Fundido del fondo y entrada de la caja (escala o desplazamiento corto) | `--mov-medio` |
+| Menús y combobox | Entrada con fundido y desplazamiento corto; se cierran al instante (el foco vuelve al disparador sin esperas) | `--mov-rapido` |
+| Avisos (toast) | Entrada y salida con fundido y desplazamiento | `--mov-medio` |
+| Filas de listas (mazos, palabras, pendientes/aprendidas) | Entrada al aparecer; salida al borrar, quitar del mazo o reactivar. Al cambiar de grupo la fila entra de nuevo en su grupo destino | `--mov-medio` |
+| Navegación entre pantallas | Fundido de entrada del contenido (el foco pasa al título de inmediato) | `--mov-medio` |
+| Cambio de tema o preset de paleta | Transición de `background-color`, `color` y `border-color` | `--mov-medio` |
+| Botones, enlaces, pestañas | Hover, foco y pulsado | `--mov-rapido` |
+| Indicador de sincronización (F-09) | Cambio de color e icono; giro de "Sincronizando…" | `--mov-medio` |
+| Barra de avance (F-07) | Crecimiento del relleno | `--mov-medio` |
 
 ### A.6 Capas (z-index)
 
@@ -519,3 +536,5 @@ Pantallas prioritarias: `/mazos` (F-02 + F-03), F-05 (frente y reverso), F-07, F
 | 2026-10-10 | Barra de avance (F-07) y vista previa (F-08) conservadas. | Derivadas de RF-26 y RF-10/11/12; sin datos nuevos. |
 | 2026-10-10 | Presets de RF-11: neutro, menta, arena, lavanda, grafito. | Aprobados; definitivos en `docs/design-tokens.md`. |
 | 2026-10-10 | Tema tras el primer login: sigue al sistema. | Coherente con RF-42. |
+| 2026-10-10 | Animaciones de transición (RF-44): catálogo en §A.5, con tokens de motion y respeto a `prefers-reduced-motion`. | Requisito nuevo en `specs.md` (R43): evitar una interfaz plana; `specs.md` primero, luego este documento, backlog (HU-16) y plan de pruebas (TC-16.x). |
+| 2026-10-10 | Tokens corregidos al implementar: éxito `#166534`; `--color-grupo-otros` (oscuro) `#6B2F0B`. Presets de fondo = conjunto completo de tokens de página. | La verificación automática de contraste (`prototype/src/styles/tokens.test.ts`) mostró ratios < 4.5:1 con los valores iniciales. |

@@ -10,7 +10,7 @@
 
 | Contenedor | Origen en specs.md |
 |---|---|
-| PWA (React + TypeScript, Vite) | §3 Frontend y PWA; RF-01 a RF-42 (UI, estudio, mazos, progreso, apariencia) |
+| PWA (React + TypeScript, Vite) | §3 Frontend y PWA; RF-01 a RF-44 (UI, estudio, mazos, progreso, apariencia, animaciones de transición) |
 | Service Worker | §3 PWA; RF-14 (caché de imágenes ya vistas), RF-28 (app disponible sin conexión) |
 | IndexedDB | §3 Caché local; RF-21, RF-28, RF-41, RF-42 (progreso, edición y sesión sin conexión) |
 | Supabase Auth | §3 Backend; RF-09, RF-37 (enlace mágico, 1 h, un solo uso, 60 s entre solicitudes) |

@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+@import './styles/tokens.css';
+
+@utility objetivo-min {
+  min-height: var(--objetivo-min);
+  min-width: var(--objetivo-min);
+}
+
+/* RF-44: transiciones. Solo tokens de motion; con movimiento reducido las duraciones valen ~0
+   y los desplazamientos 0 (ver tokens.css). Entradas y salidas no bloquean la interacción. */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--mov-distancia));
+  }
+}
+@keyframes salir {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--mov-distancia) * -1));
+  }
+}
+@keyframes fundir {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes desvanecer {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes escalar {
+  from {
+    opacity: 0;
+    transform: scale(var(--mov-escala-entrada));
+  }
+}
+@keyframes desescalar {
+  to {
+    opacity: 0;
+    transform: scale(var(--mov-escala-entrada));
+  }
+}
+
+@utility anim-entrada {
+  animation: entrar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-salida {
+  animation: salir var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-fundido {
+  animation: fundir var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-fundido-salida {
+  animation: desvanecer var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-escala {
+  animation: escalar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-escala-salida {
+  animation: desescalar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-menu {
+  animation: entrar var(--mov-rapido) var(--mov-curva) both;
+}
+
+/* Cambio de tema o paleta: el script de PrefsContext añade esta clase solo durante el cambio. */
+.cambiando-tema,
+.cambiando-tema *,
+.cambiando-tema *::before,
+.cambiando-tema *::after {
+  transition:
+    background-color var(--mov-medio) var(--mov-curva),
+    color var(--mov-medio) var(--mov-curva),
+    border-color var(--mov-medio) var(--mov-curva),
+    fill var(--mov-medio) var(--mov-curva),
+    stroke var(--mov-medio) var(--mov-curva) !important;
+}
+
+@layer base {
+  html {
+    font-family: var(--fuente-base);
+    line-height: var(--interlineado);
+  }
+  body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+  }
+  /* 2.4.7: el foco nunca se oculta */
+  :focus-visible {
+    outline: var(--foco-ancho) solid var(--color-foco);
+    outline-offset: var(--foco-desfase);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

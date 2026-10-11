@@ -16,7 +16,7 @@ Los casos se redactan declarativamente (qué se verifica, no selectores). Todos 
 
 ---
 
-## 1. Casos de prueba por criterio de aceptación (historias HU-01 a HU-14)
+## 1. Casos de prueba por criterio de aceptación (historias HU-01 a HU-16)
 
 ### HU-01 — Acceso sin contraseña (RF-09) · P0
 | ID | Escenario | Nivel | Verificación | Resultado esperado |
@@ -128,9 +128,18 @@ Los casos se redactan declarativamente (qué se verifica, no selectores). Todos 
 | TC-15.3 | Respeta los grupos | U/I | Con mazo seleccionado, buscar un texto presente en los tres grupos. | Orden RF-33 intacto con sus etiquetas; los grupos sin coincidencias no se muestran. Sin mazo seleccionado: las sin mazo siguen al final (RF-34). |
 | TC-15.4 | Restaurar lista | I | Vaciar el campo. | Vuelve la lista completa y el orden original. |
 
+### HU-16 — Interfaz con transiciones (RF-44) · P2
+| ID | Escenario | Nivel | Verificación | Resultado esperado |
+|---|---|---|---|---|
+| TC-16.1 | Transiciones en acciones principales | I/E | Voltear tarjeta, pasar a la siguiente, abrir y cerrar un diálogo y un menú, navegar entre pantallas. | Cada cambio tiene transición con duración y curva tomadas de los tokens de motion (`--mov-*`); ninguna usa valores fijos en el componente. |
+| TC-16.2 | Entrada y salida de elementos | I/E | Agregar, quitar y mover elementos en las listas; mostrar y cerrar un aviso. | La entrada y la salida se animan; al terminar, el DOM refleja el estado final correcto (el elemento quitado ya no existe). |
+| TC-16.3 | Cambio de tema o paleta | E/A | Alternar tema (azul, blanco, oscuro) y presets. | Los colores cambian con transición; el contraste final cumple AA (TC-EC35). |
+| TC-16.4 | Estado de sincronización | I | Recorrer los estados del indicador. | Cada cambio se anima y mantiene texto e icono; el anuncio `aria-live` sigue emitiéndose. |
+| TC-16.5 | Movimiento reducido | E/A | Activar `prefers-reduced-motion: reduce` y repetir TC-16.1 a TC-16.4. | Los cambios son instantáneos (duraciones ≈ 0); el volteo no rota; no se pierde información ni funcionalidad. |
+
 ---
 
-## 2. Casos de prueba por edge case del backlog (EC-01 a EC-36)
+## 2. Casos de prueba por edge case del backlog (EC-01 a EC-55)
 
 Los vacíos V-01 a V-09 están resueltos en `specs.md`; los casos antes bloqueados quedan desbloqueados y alineados con RF-14, 15, 19, 22, 27, 37 a 40.
 
@@ -188,6 +197,9 @@ Los vacíos V-01 a V-09 están resueltos en `specs.md`; los casos antes bloquead
 | TC-EC-50 | EC-50 | I/A | Segundo pedido antes de 60 s → deshabilitado con cuenta regresiva anunciada; el enlace anterior queda inválido. | 37 | P1 | |
 | TC-EC-51 | EC-51 | I/A | Texto sin coincidencias → aviso "sin resultados" anunciado a lector de pantalla; vaciar el campo restaura la lista. | 43 | P2 | |
 | TC-EC-52 | EC-52 | I/E | Sin red, buscar ` dog ` (espacios sobrantes) → encuentra las palabras con "dog"; funciona igual que con conexión. | 43, 28 | P2 | |
+| TC-EC-53 | EC-53 | I/E | Responder varias tarjetas seguidas en < 100 ms cada una, con transiciones en curso → todas las respuestas se registran una sola vez y en orden; ninguna acción queda bloqueada por la animación. | 44, 06 | P2 | |
+| TC-EC-54 | EC-54 | A | Con movimiento reducido (o sin ver la animación), acierto, fallo y estado de sincronización → se comunican igualmente con texto o icono y anuncio `aria-live`. | 44 | P2 | |
+| TC-EC-55 | EC-55 | E | Sin red, repetir TC-16.1 → las transiciones funcionan igual. | 44, 28 | P2 | |
 
 ---
 
@@ -268,7 +280,7 @@ Hallazgos nuevos tras cruzar `backlog.md` con `specs.md`. Los que dependían de 
 
 ## 5. Validación final: cobertura de RF de `specs.md`
 
-Se verificó cada RF (RF-01 a RF-43) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
+Se verificó cada RF (RF-01 a RF-44) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
 
 | RF | Casos asociados | Cobertura |
 |---|---|---|
@@ -315,10 +327,11 @@ Se verificó cada RF (RF-01 a RF-43) contra los casos de §1 y §2. "Parcial" = 
 | RF-41 | TC-EC42, TC-EC43 | Completa |
 | RF-42 | TC-EC49 | Completa |
 | RF-43 | TC-15.1–15.4, TC-EC51, TC-EC52 | Completa |
+| RF-44 | TC-16.1–16.5, TC-EC53–TC-EC55 | Completa |
 
 ### Resultado
 
-- **RF sin ningún test asociado: ninguno.** Los 43 RF tienen al menos un caso en §1 o §2.
+- **RF sin ningún test asociado: ninguno.** Los 44 RF tienen al menos un caso en §1 o §2.
 - **RF con cobertura parcial (cerrada con los casos suplementarios de abajo):** RF-02, RF-13, RF-16, RF-18, RF-26.
 - **Casos bloqueados:** ninguno. V-01 a V-09 se resolvieron en `specs.md` el 2026-10-10 (RF-14, 15, 19, 22, 27, 37 a 40).
 - **Requisitos fuera de la numeración RF sin test en §1–§2:** PWA instalable (manifest, service worker) y estados de carga/error genéricos (CLAUDE.md, RNF). Cubiertos por TC-S05 y TC-S06.
@@ -338,7 +351,7 @@ Se verificó cada RF (RF-01 a RF-43) contra los casos de §1 y §2. "Parcial" = 
 
 ## 6. Resumen
 
-- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-15 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-52, uno por uno; más 6 casos suplementarios.
+- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-16 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-55, uno por uno; más 6 casos suplementarios.
 - **Casos bloqueados:** ninguno; los 9 antes bloqueados por `[A CONFIRMAR]` quedaron desbloqueados.
 - **Riesgos prioritarios (P0):** NEC-07, 06, 03, 08, 04, 11 (§4).
 - **Vacíos que siguen abiertos:** ninguno; los NEC [VACÍO] quedaron resueltos en `specs.md` (R31 a R41).
