@@ -2,7 +2,7 @@
 
 > Única fuente de verdad del proyecto. Fecha: 2026-10-10.
 >
-> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas). `CLAUDE.md` = instrucciones del proyecto.
+> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas; R42: aprobación del RF-43, búsqueda en el panel de palabras, durante la revisión de `docs/prototype-spec.md`). `CLAUDE.md` = instrucciones del proyecto.
 > **[PENDIENTE]** = vacío sin resolver; no se asume nada.
 
 ## 1. Objetivos
@@ -27,6 +27,7 @@
 - Pantalla de progreso y reactivación de palabras aprendidas (R12).
 - Ejemplo de uso y nota libre opcionales en la tarjeta (R16).
 - Quitar una palabra de un mazo sin borrarla (R29).
+- Búsqueda de palabras en el panel derecho (R42).
 
 ### Out-of-Scope (CLAUDE.md)
 - Apps nativas móviles o de escritorio; solo PWA responsive.
@@ -101,6 +102,7 @@
 | RF-40 | El usuario puede quitar una palabra de un mazo sin borrarla. Su progreso en ese mazo se elimina; si se vuelve a agregar al mazo, empieza con el contador en 0. | (R29) |
 | RF-41 | La sesión iniciada se mantiene sin conexión; solo el primer acceso requiere red. Cerrar sesión con cambios sin sincronizar pide confirmación y advierte de la pérdida de datos. | (R35) |
 | RF-42 | Tema, paleta y lado de la imagen se guardan con la cuenta, funcionan sin conexión y se aplican antes del primer pintado; antes de iniciar sesión se usa la preferencia del sistema (claro u oscuro). En conflicto gana el cambio más reciente (RF-29). | (R40) |
+| RF-43 | El panel derecho incluye un campo de búsqueda que filtra las palabras visibles por subcadena en inglés o español, ignorando mayúsculas y acentos. El filtro respeta los grupos de RF-33 y RF-34 (el orden se mantiene; los grupos sin coincidencias no se muestran). Sin coincidencias se muestra un aviso de "sin resultados"; al vaciar el campo se restaura la lista completa. Funciona sin conexión (RF-28). | (R42) |
 
 ## 6. Requisitos no funcionales
 Se heredan sin cambios de CLAUDE.md; no añaden funcionalidad.
@@ -191,3 +193,4 @@ No quedan [PENDIENTE] abiertos al 2026-10-10.
 | 2026-10-10 | Nombres de mazo: obligatorios, únicos, máximo 60; búsqueda sin mayúsculas ni acentos. | R39 (P-29); Evita ambigüedad en el menú de RF-20. |
 | 2026-10-10 | Preferencias de apariencia sincronizadas con la cuenta y aplicadas antes del primer pintado. | R40 (P-30); Experiencia consistente entre dispositivos (RF-29). |
 | 2026-10-10 | Enlace mágico: 60 s entre solicitudes. | R41 (P-31); Evita abuso y dobles envíos. |
+| 2026-10-10 | Búsqueda en el panel de palabras (RF-43). | R42; mejora el uso con muchas palabras; coherente con RF-20. |

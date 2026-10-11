@@ -120,6 +120,14 @@ Los casos se redactan declarativamente (qué se verifica, no selectores). Todos 
 | TC-14.1 | Frente / reverso / ambos | I | Alternar la preferencia. | Tarjetas con imagen la muestran en los lados elegidos. |
 | TC-14.2 | Preferencia global | I | Cambiar y estudiar mazos distintos. | Misma preferencia en todos los mazos. |
 
+### HU-15 — Buscar palabras en el panel (RF-43) · P2
+| ID | Escenario | Nivel | Verificación | Resultado esperado |
+|---|---|---|---|---|
+| TC-15.1 | Filtrar por inglés o español | U/I | Escribir parte de un término en inglés y luego en español. | Solo se listan palabras que contienen el texto en alguno de los dos campos; el filtro se actualiza al escribir. |
+| TC-15.2 | Sin mayúsculas ni acentos | U | Buscar `CAMION` con la palabra `camión`. | La palabra aparece. |
+| TC-15.3 | Respeta los grupos | U/I | Con mazo seleccionado, buscar un texto presente en los tres grupos. | Orden RF-33 intacto con sus etiquetas; los grupos sin coincidencias no se muestran. Sin mazo seleccionado: las sin mazo siguen al final (RF-34). |
+| TC-15.4 | Restaurar lista | I | Vaciar el campo. | Vuelve la lista completa y el orden original. |
+
 ---
 
 ## 2. Casos de prueba por edge case del backlog (EC-01 a EC-36)
@@ -178,6 +186,8 @@ Los vacíos V-01 a V-09 están resueltos en `specs.md`; los casos antes bloquead
 | TC-EC-48 | EC-48 | U/I | Nombres vacíos, repetidos (`Árbol`/`arbol`), de 61 caracteres → rechazados con motivo; búsqueda `arb` encuentra `Árboles`. | 16, 19, 20 | P2 | |
 | TC-EC-49 | EC-49 | E | Cambiar preferencias en un dispositivo; abrir otro → se aplican sin destello; offline también. | 42, 10, 11, 12 | P2 | |
 | TC-EC-50 | EC-50 | I/A | Segundo pedido antes de 60 s → deshabilitado con cuenta regresiva anunciada; el enlace anterior queda inválido. | 37 | P1 | |
+| TC-EC-51 | EC-51 | I/A | Texto sin coincidencias → aviso "sin resultados" anunciado a lector de pantalla; vaciar el campo restaura la lista. | 43 | P2 | |
+| TC-EC-52 | EC-52 | I/E | Sin red, buscar ` dog ` (espacios sobrantes) → encuentra las palabras con "dog"; funciona igual que con conexión. | 43, 28 | P2 | |
 
 ---
 
@@ -258,7 +268,7 @@ Hallazgos nuevos tras cruzar `backlog.md` con `specs.md`. Los que dependían de 
 
 ## 5. Validación final: cobertura de RF de `specs.md`
 
-Se verificó cada RF (RF-01 a RF-42) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
+Se verificó cada RF (RF-01 a RF-43) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
 
 | RF | Casos asociados | Cobertura |
 |---|---|---|
@@ -304,10 +314,11 @@ Se verificó cada RF (RF-01 a RF-42) contra los casos de §1 y §2. "Parcial" = 
 | RF-40 | TC-08.5 | Completa |
 | RF-41 | TC-EC42, TC-EC43 | Completa |
 | RF-42 | TC-EC49 | Completa |
+| RF-43 | TC-15.1–15.4, TC-EC51, TC-EC52 | Completa |
 
 ### Resultado
 
-- **RF sin ningún test asociado: ninguno.** Los 42 RF tienen al menos un caso en §1 o §2.
+- **RF sin ningún test asociado: ninguno.** Los 43 RF tienen al menos un caso en §1 o §2.
 - **RF con cobertura parcial (cerrada con los casos suplementarios de abajo):** RF-02, RF-13, RF-16, RF-18, RF-26.
 - **Casos bloqueados:** ninguno. V-01 a V-09 se resolvieron en `specs.md` el 2026-10-10 (RF-14, 15, 19, 22, 27, 37 a 40).
 - **Requisitos fuera de la numeración RF sin test en §1–§2:** PWA instalable (manifest, service worker) y estados de carga/error genéricos (CLAUDE.md, RNF). Cubiertos por TC-S05 y TC-S06.
@@ -327,7 +338,7 @@ Se verificó cada RF (RF-01 a RF-42) contra los casos de §1 y §2. "Parcial" = 
 
 ## 6. Resumen
 
-- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-14 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-37, uno por uno; más 6 casos suplementarios.
+- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-15 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-52, uno por uno; más 6 casos suplementarios.
 - **Casos bloqueados:** ninguno; los 9 antes bloqueados por `[A CONFIRMAR]` quedaron desbloqueados.
 - **Riesgos prioritarios (P0):** NEC-07, 06, 03, 08, 04, 11 (§4).
 - **Vacíos que siguen abiertos:** ninguno; los NEC [VACÍO] quedaron resueltos en `specs.md` (R31 a R41).

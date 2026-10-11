@@ -343,6 +343,33 @@ Escenario: La preferencia es global
   Entonces todas respetan la misma preferencia
 ```
 
+### HU-15 — Buscar palabras en el panel
+**Como** estudiante **quiero** buscar entre mis palabras escribiendo parte del término **para** encontrarlas rápido cuando tengo muchas.
+**Origen:** RF-43
+
+```gherkin
+Escenario: Filtrar por inglés o español
+  Dado que veo la lista de palabras
+  Cuando escribo parte de un término en inglés o en español
+  Entonces solo aparecen las palabras que contienen ese texto
+
+Escenario: Sin distinguir mayúsculas ni acentos
+  Dado que existe la palabra "camión"
+  Cuando busco "CAMION"
+  Entonces la palabra aparece entre los resultados
+
+Escenario: La búsqueda respeta los grupos
+  Dado que he seleccionado un mazo y busco un texto
+  Cuando veo los resultados
+  Entonces se mantienen el orden y las etiquetas de los grupos
+  Y los grupos sin coincidencias no se muestran
+
+Escenario: Restaurar la lista
+  Dado que tengo un texto de búsqueda activo
+  Cuando vacío el campo
+  Entonces vuelve a verse la lista completa
+```
+
 ---
 
 ## 2. Edge cases y escenarios de fallo
@@ -720,6 +747,22 @@ Escenario: Solicitudes repetidas de enlace
   Y al pedir uno nuevo después, el anterior deja de ser válido
 ```
 
+### Búsqueda de palabras (HU-15)
+```gherkin
+# EC-51 — Origen: RF-43
+Escenario: Búsqueda sin coincidencias
+  Dado que busco en la lista de palabras
+  Cuando lo que escribo no coincide con ninguna palabra
+  Entonces la app indica que no hay resultados
+  Y puedo vaciar el campo para ver la lista completa
+
+# EC-52 — Origen: RF-43, RF-28
+Escenario: Buscar sin conexión y con espacios sobrantes
+  Dado que no tengo conexión
+  Cuando busco " dog " con espacios al principio y al final
+  Entonces la búsqueda funciona igualmente y encuentra las palabras que contienen "dog"
+```
+
 ---
 
 ## 3. Vacíos detectados en `specs.md`: resueltos (2026-10-10)
@@ -765,6 +808,7 @@ Los nueve vacíos de la primera versión de este backlog se resolvieron en `spec
 | RF-37 | EC-03 | RF-38 | HU-05, EC-10, EC-11 |
 | RF-39 | HU-06, EC-13 | RF-40 | HU-08 |
 | RF-41 | EC-42, EC-43 | RF-42 | EC-49 |
+| RF-43 | HU-15, EC-51, EC-52 | | |
 
 **RF ampliados por la resolución de NEC:** RF-16, RF-20 (EC-48); RF-26 (EC-47); RF-29 (EC-38 a EC-41); RF-31 (EC-46); RF-36 (EC-44, EC-45); RF-37 (EC-50).
 

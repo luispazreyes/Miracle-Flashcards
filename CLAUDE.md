@@ -9,6 +9,7 @@ Aplicación de flashcards para estudio con repetición espaciada: crear mazos y 
 - Estilos: CSS con Design Tokens (variables CSS / JSON de tokens)
 - **Progressive Web App (PWA)**: instalable, manifest + service worker, funcionamiento offline y responsive
 - Base de datos (preliminar): Supabase (Postgres + Auth); caché local en IndexedDB para uso offline y sincronización
+- Decisión de BD (2026-10-10): Supabase elegido sobre Firebase por el modelo relacional (RF-23, RF-30, RF-16, RF-36) y el control de sincronización (RF-22, RF-29); ver `docs/adr/001-database-selection.md`.
 - Pruebas: Vitest + Testing Library; axe para accesibilidad
 
 ## Convenciones de trabajo
