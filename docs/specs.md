@@ -2,7 +2,7 @@
 
 > Única fuente de verdad del proyecto. Fecha: 2026-10-10.
 >
-> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas; R42: aprobación del RF-43, búsqueda en el panel de palabras, durante la revisión de `docs/prototype-spec.md`; R43: RF-44, animaciones de transición, solicitado al revisar el prototipo). `CLAUDE.md` = instrucciones del proyecto.
+> **Leyenda de fuentes:** `T-n` = línea n de `Recording 2026-10-10-22-26-55.txt` (transcripción). `R1..R21` = respuestas del usuario en cuatro rondas (R1 a R4: diagnóstico; R5 a R8: P-01 a P-04; R9 a R17: RF-19 y pendientes restantes; R18 a R21: P-09 a P-11; R22 a R30: P-12 a P-20, resolución de los vacíos V-01 a V-09 del backlog; R31 a R41: P-21 a P-31, resolución de los NEC [VACÍO] del plan de pruebas; R42: aprobación del RF-43, búsqueda en el panel de palabras, durante la revisión de `docs/prototype-spec.md`; R43: RF-44, animaciones de transición, solicitado al revisar el prototipo; R44: ampliación de RF-44 y RF-45, animaciones de componentes, arrastre y depósito, solicitado por el PO). `CLAUDE.md` = instrucciones del proyecto.
 > **[PENDIENTE]** = vacío sin resolver; no se asume nada.
 
 ## 1. Objetivos
@@ -29,6 +29,7 @@
 - Quitar una palabra de un mazo sin borrarla (R29).
 - Búsqueda de palabras en el panel derecho (R42).
 - Animaciones de transición en la interfaz (R43).
+- Animaciones de arrastre y depósito de palabras y de los estados de interacción de cada componente (R44).
 
 ### Out-of-Scope (CLAUDE.md)
 - Apps nativas móviles o de escritorio; solo PWA responsive.
@@ -78,7 +79,7 @@
 | RF-15 | Al asociar una imagen se valida que la URL sea http(s) y que cargue como imagen. Sin conexión no se puede validar: la URL se guarda como "sin verificar" con un aviso visible y se valida al recuperar la conexión; si falla, se retira la imagen y se avisa al usuario. | (R5, R25) |
 | RF-16 | La app permite varios mazos; la lista de mazos aparece a la izquierda. El nombre de un mazo es obligatorio (recortado), único sin distinguir mayúsculas ni acentos y de máximo 60 caracteres; si no cumple, no se guarda y se indica el motivo. | (R7, R39) |
 | RF-17 | El usuario escribe una palabra con su traducción e imagen; la palabra creada aparece en el panel derecho (ver RF-33 y RF-34). | (R7) |
-| RF-18 | El usuario puede arrastrar una palabra del panel derecho al mazo donde quiere agregarla. | (R7) |
+| RF-18 | El usuario puede arrastrar una palabra del panel derecho al mazo donde quiere agregarla. Ver RF-45 para la animación. | (R7, R44) |
 | RF-19 | El usuario puede editar o borrar palabras individuales y mazos completos. Antes de borrar se muestra un diálogo de confirmación; el borrado es definitivo. Borrar una palabra que está en varios mazos la elimina de todos ellos junto con su progreso; el diálogo de confirmación indica en cuántos mazos está. | (R7, R9, R26) |
 | RF-20 | El usuario también puede agregar una palabra a un mazo seleccionándola y eligiendo el mazo en un menú desplegable con búsqueda predictiva. La búsqueda predictiva ignora mayúsculas y acentos y busca por subcadena. | (R7, R39) |
 | RF-21 | Sin conexión, el progreso se guarda localmente. | (R8, R13) |
@@ -104,11 +105,12 @@
 | RF-41 | La sesión iniciada se mantiene sin conexión; solo el primer acceso requiere red. Cerrar sesión con cambios sin sincronizar pide confirmación y advierte de la pérdida de datos. | (R35) |
 | RF-42 | Tema, paleta y lado de la imagen se guardan con la cuenta, funcionan sin conexión y se aplican antes del primer pintado; antes de iniciar sesión se usa la preferencia del sistema (claro u oscuro). En conflicto gana el cambio más reciente (RF-29). | (R40) |
 | RF-43 | El panel derecho incluye un campo de búsqueda que filtra las palabras visibles por subcadena en inglés o español, ignorando mayúsculas y acentos. El filtro respeta los grupos de RF-33 y RF-34 (el orden se mantiene; los grupos sin coincidencias no se muestran). Sin coincidencias se muestra un aviso de "sin resultados"; al vaciar el campo se restaura la lista completa. Funciona sin conexión (RF-28). | (R42) |
-| RF-44 | La interfaz usa animaciones de transición para que la app no se vea plana: al menos en el volteo de la tarjeta (RF-02), el cambio entre tarjetas de la sesión, la apertura y cierre de diálogos, menús y avisos, la aparición y salida de elementos de las listas (palabras, mazos, aprendidas/pendientes), la navegación entre pantallas, el cambio de tema y de paleta, y los estados de la barra de sincronización (RF-22). Las transiciones son breves y sutiles (duración y curva definidas como tokens de motion), no bloquean ni retrasan la interacción y no son el único indicador de un cambio de estado. Con `prefers-reduced-motion: reduce` se sustituyen por cambios instantáneos (sin movimiento ni rotación). Funcionan sin conexión (RF-28). | (R43) |
+| RF-44 | La interfaz usa animaciones de transición para que la app no se vea plana: al menos en el volteo de la tarjeta (RF-02), el cambio entre tarjetas de la sesión, la apertura y cierre de diálogos, menús y avisos, la aparición y salida de elementos de las listas (palabras, mazos, aprendidas/pendientes), la navegación entre pantallas, el cambio de tema y de paleta, y los estados de la barra de sincronización (RF-22). Las transiciones son breves y sutiles (duración y curva definidas como tokens de motion), no bloquean ni retrasan la interacción y no son el único indicador de un cambio de estado. Con `prefers-reduced-motion: reduce` se sustituyen por cambios instantáneos (sin movimiento ni rotación). Funcionan sin conexión (RF-28). Además, todo componente interactivo (botón, tarjeta, campo, menú, mazo, palabra) anima sus estados de hover, foco, pulsado y deshabilitado, y su aparición y salida; el catálogo componente → animación se define en `docs/design-tokens.md`. | (R43, R44) |
+| RF-45 | Al arrastrar una palabra del panel derecho hacia un mazo (RF-18): la palabra se eleva y sigue al puntero o dedo; el mazo destino se resalta mientras la palabra está sobre él; al soltarla se anima el depósito (la palabra entra en el mazo y el mazo reacciona). Si se suelta fuera de un mazo válido, o el depósito se bloquea por duplicado (RF-36), la palabra vuelve animada a su posición en el panel. Al agregar con el menú desplegable (RF-20) se muestra una versión breve de la animación de depósito. Con `prefers-reduced-motion: reduce` el cambio es instantáneo y se anuncia con un aviso accesible. Ningún estado depende solo de la animación: siempre hay un indicador estático (grupos de RF-33 y RF-34, aviso de RF-36). Funciona sin conexión (RF-28). | (R44) |
 
 ## 6. Requisitos no funcionales
 Se heredan sin cambios de CLAUDE.md; no añaden funcionalidad.
-- Accesibilidad WCAG 2.1 AA (contraste, teclado, foco visible, ARIA, `prefers-reduced-motion`; las animaciones de RF-44 respetan esta preferencia).
+- Accesibilidad WCAG 2.1 AA (contraste, teclado, foco visible, ARIA, `prefers-reduced-motion`; las animaciones de RF-44 y RF-45 respetan esta preferencia).
 - Design Tokens para color, tipografía, espaciado, radios, sombras y motion; sin valores hardcodeados en componentes.
 - Estados vacío/carga/error definidos; acciones destructivas con confirmación o reversibles.
 - PWA instalable y responsive.
@@ -197,3 +199,4 @@ No quedan [PENDIENTE] abiertos al 2026-10-10.
 | 2026-10-10 | Enlace mágico: 60 s entre solicitudes. | R41 (P-31); Evita abuso y dobles envíos. |
 | 2026-10-10 | Búsqueda en el panel de palabras (RF-43). | R42; mejora el uso con muchas palabras; coherente con RF-20. |
 | 2026-10-10 | Animaciones de transición en la app (RF-44), con respeto a `prefers-reduced-motion`. | R43; evita una interfaz plana y aburrida; compatible con WCAG 2.1 AA y con los tokens de motion. |
+| 2026-10-10 | Todo componente anima sus estados; arrastre y depósito de palabras animados (RF-45), con equivalente en el menú de RF-20 y respeto a `prefers-reduced-motion`. | R44; amplía RF-44, no añade [PENDIENTE]; el catálogo por componente va en `docs/design-tokens.md`. |

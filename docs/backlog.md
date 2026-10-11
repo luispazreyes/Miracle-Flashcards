@@ -400,6 +400,57 @@ Escenario: Movimiento reducido
   Cuando uso cualquiera de las acciones anteriores
   Entonces los cambios son instantáneos, sin movimiento ni rotación
   Y no pierdo ninguna información
+
+Escenario: Estados de interacción de los componentes
+  Dado que uso un botón, una tarjeta, un campo, un menú, un mazo o una palabra
+  Cuando paso el puntero, enfoco, pulso o el componente queda deshabilitado
+  Entonces el cambio de estado se presenta con una transición breve
+  Y el componente también se anima al aparecer y al salir
+```
+
+### HU-17 — Arrastrar y depositar palabras con animación
+**Como** estudiante **quiero** ver cómo la palabra se arrastra y se deposita en el mazo **para** confirmar visualmente dónde queda.
+**Origen:** RF-45 (RF-18, RF-20, RF-36)
+
+```gherkin
+Escenario: La palabra sigue al puntero
+  Dado que veo una palabra en el panel de palabras
+  Cuando empiezo a arrastrarla
+  Entonces la palabra se eleva y se mueve junto a mi puntero o dedo
+
+Escenario: El mazo destino se resalta
+  Dado que estoy arrastrando una palabra
+  Cuando la llevo sobre un mazo
+  Entonces el mazo se resalta para indicar que acepta el depósito
+
+Escenario: Depósito en el mazo
+  Dado que arrastro una palabra sobre un mazo
+  Cuando la suelto
+  Entonces se ve cómo la palabra entra en el mazo y el mazo reacciona
+  Y la palabra pertenece a ese mazo
+
+Escenario: Soltar fuera de un mazo
+  Dado que estoy arrastrando una palabra
+  Cuando la suelto fuera de un mazo válido
+  Entonces la palabra vuelve animada a su posición en el panel
+  Y no cambia de mazo
+
+Escenario: Depósito bloqueado por duplicado
+  Dado que la palabra ya está en el mazo
+  Cuando la suelto sobre ese mazo
+  Entonces la palabra vuelve animada a su posición
+  Y veo el aviso de que ya está en el mazo
+
+Escenario: Agregar con el menú desplegable
+  Dado que elijo un mazo con el menú de búsqueda predictiva
+  Cuando confirmo
+  Entonces se muestra una versión breve de la animación de depósito
+
+Escenario: Movimiento reducido
+  Dado que mi sistema pide reducir el movimiento
+  Cuando arrastro y suelto una palabra, o uso el menú
+  Entonces el cambio es instantáneo, sin movimiento
+  Y recibo un aviso accesible de que la palabra fue agregada
 ```
 
 ---
@@ -817,6 +868,37 @@ Escenario: Transiciones sin conexión
   Entonces las transiciones funcionan igual que con conexión
 ```
 
+### Arrastre y depósito (HU-17)
+```gherkin
+# EC-56 — Origen: RF-45
+Escenario: Cancelar el arrastre
+  Dado que estoy arrastrando una palabra
+  Cuando cancelo el arrastre, por ejemplo con Escape o interrumpiéndolo el sistema
+  Entonces la palabra vuelve animada a su posición
+  Y no se agrega a ningún mazo
+
+# EC-57 — Origen: RF-45, RF-28
+Escenario: Depositar sin conexión
+  Dado que no tengo conexión
+  Cuando arrastro una palabra a un mazo
+  Entonces la animación de depósito funciona igual que con conexión
+  Y el cambio se guarda localmente para sincronizarse después
+
+# EC-58 — Origen: RF-45, WCAG
+Escenario: El depósito no depende de la animación
+  Dado que no llego a ver la animación o el movimiento está reducido
+  Cuando una palabra se deposita en un mazo o se rechaza
+  Entonces el resultado se comunica con un aviso de texto anunciado a lectores de pantalla
+  Y la palabra aparece en su grupo correcto del panel
+
+# EC-59 — Origen: RF-45, RF-44
+Escenario: Soltar rápido y arrastres consecutivos
+  Dado que una animación de depósito sigue en curso
+  Cuando arrastro y suelto otra palabra de inmediato
+  Entonces ambas palabras quedan en su mazo, sin duplicados ni pérdidas
+  Y ninguna acción queda bloqueada hasta que termine la animación
+```
+
 ---
 
 ## 3. Vacíos detectados en `specs.md`: resueltos (2026-10-10)
@@ -858,11 +940,12 @@ Los nueve vacíos de la primera versión de este backlog se resolvieron en `spec
 | RF-15 | HU-06, EC-14, EC-15, EC-16 | RF-33 | HU-09, EC-24, EC-25, EC-27 |
 | RF-16 | HU-07, EC-20 | RF-34 | HU-09, EC-26, EC-27 |
 | RF-17 | HU-06, EC-13 | RF-35 | HU-05, EC-09, EC-10, EC-11 |
-| RF-18 | HU-08 | RF-36 | HU-08, EC-17, EC-18 |
+| RF-18 | HU-08, HU-17 | RF-36 | HU-08, EC-17, EC-18 |
 | RF-37 | EC-03 | RF-38 | HU-05, EC-10, EC-11 |
 | RF-39 | HU-06, EC-13 | RF-40 | HU-08 |
 | RF-41 | EC-42, EC-43 | RF-42 | EC-49 |
 | RF-43 | HU-15, EC-51, EC-52 | RF-44 | HU-16, EC-53, EC-54, EC-55 |
+| RF-45 | HU-17, HU-08, EC-56, EC-57, EC-58, EC-59 | | |
 
 **RF ampliados por la resolución de NEC:** RF-16, RF-20 (EC-48); RF-26 (EC-47); RF-29 (EC-38 a EC-41); RF-31 (EC-46); RF-36 (EC-44, EC-45); RF-37 (EC-50).
 

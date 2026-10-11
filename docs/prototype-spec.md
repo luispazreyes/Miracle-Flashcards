@@ -8,7 +8,7 @@
 
 ## 0. Cómo se derivó el alcance
 
-Las funcionalidades de la sección C salen **solo** de `specs.md` (RF-01 a RF-42). Los ejemplos genéricos "proyectos, tablero de tareas, asignación de personas" no existen en este producto y **no se incluyen**. Su equivalente aquí son mazos, panel de palabras y sesión de estudio.
+Las funcionalidades de la sección C salen **solo** de `specs.md` (RF-01 a RF-45). Los ejemplos genéricos "proyectos, tablero de tareas, asignación de personas" no existen en este producto y **no se incluyen**. Su equivalente aquí son mazos, panel de palabras y sesión de estudio.
 
 ### Mapa de funcionalidades MVP
 
@@ -16,14 +16,15 @@ Las funcionalidades de la sección C salen **solo** de `specs.md` (RF-01 a RF-42
 |---|---|---|
 | F-01 | Acceso con enlace mágico | RF-09, RF-37, RF-41 |
 | F-02 | Gestión de mazos | RF-16, RF-19, RF-24, RF-35 |
-| F-03 | Panel de palabras (grupos, arrastrar, menú) | RF-17, RF-18, RF-20, RF-23, RF-33, RF-34, RF-40, RF-43 |
+| F-03 | Panel de palabras (grupos, arrastrar, menú) | RF-17, RF-18, RF-20, RF-23, RF-33, RF-34, RF-40, RF-43, RF-45 |
 | F-04 | Crear y editar palabra | RF-03, RF-08, RF-15, RF-17, RF-19, RF-32, RF-36, RF-39 |
 | F-05 | Sesión de estudio | RF-01 a RF-07, RF-12, RF-13, RF-25, RF-31, RF-35 |
 | F-06 | Fin de sesión y mazo sin pendientes | RF-38 |
 | F-07 | Progreso y reactivación | RF-26, RF-27, RF-30 |
 | F-08 | Apariencia y preferencias | RF-10, RF-11, RF-12, RF-42 |
 | F-09 | Offline y sincronización | RF-14, RF-21, RF-22, RF-28, RF-29, RF-41 |
-| Transversal | Animaciones de transición (catálogo en §A.5) | RF-44 |
+| Transversal | Animaciones de transición y de estados de componentes (catálogo en §A.5) | RF-44 |
+| Transversal | Animación de arrastre y depósito de palabras (F-03, §A.5) | RF-45 |
 
 ### Navegación global
 
@@ -124,6 +125,7 @@ El texto debe poder ampliarse al 200 % sin perder contenido ni funcionalidad; us
 | `--mov-medio` | `240ms` | Diálogos, paneles |
 | `--mov-volteo` | `400ms` | Volteo de tarjeta (RF-02) |
 | `--mov-curva` | `cubic-bezier(.2,0,0,1)` | Curva estándar |
+| `--mov-deposito` | `300ms` | Depósito de una palabra en un mazo (RF-45); valor definitivo en `docs/design-tokens.md` §6 |
 
 Con `prefers-reduced-motion: reduce` todos los `--mov-*` valen `0.01ms` y el volteo se sustituye por un cambio instantáneo con fundido de 0 ms (sin rotación 3D).
 
@@ -140,6 +142,12 @@ Con `prefers-reduced-motion: reduce` todos los `--mov-*` valen `0.01ms` y el vol
 | Navegación entre pantallas | Fundido de entrada del contenido (el foco pasa al título de inmediato) | `--mov-medio` |
 | Cambio de tema o preset de paleta | Transición de `background-color`, `color` y `border-color` | `--mov-medio` |
 | Botones, enlaces, pestañas | Hover, foco y pulsado | `--mov-rapido` |
+| Tarjeta, campos, ítems de mazo, filas de palabra, menús | Hover, foco, pulsado y deshabilitado (RF-44, R44); todo componente interactivo anima sus estados | `--mov-rapido` |
+| Arrastre de palabra (RF-45) | La fila se eleva (`--sombra-2`, ligera escala) y sigue al puntero o dedo; sin retraso | Sigue al puntero (sin transición); elevación en `--mov-rapido` |
+| Mazo destino durante el arrastre (RF-45) | Resaltado al pasar encima (borde y fondo, no solo color) y vuelta al estado normal al salir | `--mov-rapido` |
+| Depósito en el mazo (RF-45) | La palabra se encoge y entra en el mazo; el mazo reacciona (pulso del ítem y del contador) | `--mov-deposito` |
+| Soltar fuera o duplicado (RF-45) | La palabra vuelve animada a su posición en el panel | `--mov-medio` |
+| Agregar desde el menú "Agregar a mazo" (RF-20, RF-45) | Versión breve del depósito: pulso del mazo y de la fila | `--mov-medio` |
 | Indicador de sincronización (F-09) | Cambio de color e icono; giro de "Sincronizando…" | `--mov-medio` |
 | Barra de avance (F-07) | Crecimiento del relleno | `--mov-medio` |
 
@@ -291,7 +299,7 @@ Convención de cada subsección: **Propósito · Componentes · Layout · Estado
 ---
 
 ### F-03. Panel de palabras
-**Requerimientos:** RF-17, RF-18, RF-20, RF-23, RF-33, RF-34, RF-40, RF-43.
+**Requerimientos:** RF-17, RF-18, RF-20, RF-23, RF-33, RF-34, RF-40, RF-43, RF-45.
 
 **Propósito.** Ver todas las palabras, distinguir a qué mazos pertenecen y asignarlas a un mazo por arrastre o por menú. Es la columna derecha de `/mazos`.
 
@@ -316,9 +324,10 @@ Convención de cada subsección: **Propósito · Componentes · Layout · Estado
 | Vacío de grupo | El grupo vacío no se muestra |
 | Carga | Esqueleto de filas |
 | Error de carga | Mensaje + "Reintentar" |
-| Arrastrando | Fila elevada (`--sombra-2`), mazos destino resaltados con borde punteado; anuncio `aria-live`: "Arrastrando «Palabra A». Suéltala sobre un mazo." |
-| Soltada con éxito | Aviso "«Palabra A» agregada a «Mazo 1»." |
-| Duplicado en el mazo | Se bloquea y se avisa "«Palabra A» ya está en este mazo." (RF-36) |
+| Arrastrando | Fila elevada (`--sombra-2`) que sigue al puntero (RF-45); mazos destino resaltados con borde punteado, y el mazo bajo la palabra con resaltado más fuerte; anuncio `aria-live`: "Arrastrando «Palabra A». Suéltala sobre un mazo." |
+| Soltada con éxito | Animación de depósito (la palabra entra en el mazo y el mazo reacciona, RF-45) y aviso "«Palabra A» agregada a «Mazo 1»." Con movimiento reducido: cambio instantáneo y mismo aviso |
+| Soltada fuera de un mazo o cancelada | La palabra vuelve animada a su posición; no cambia de mazo |
+| Duplicado en el mazo | Se bloquea, la palabra vuelve animada y se avisa "«Palabra A» ya está en este mazo." (RF-36) |
 | Menú abierto sin coincidencias | "Sin resultados para «{texto}»." |
 | Quitar de mazo | Diálogo: "¿Quitar «Palabra A» de «Mazo 1»? La palabra no se borra, pero se elimina su progreso en este mazo." (RF-40) |
 | Borrar palabra | Diálogo: "¿Borrar «Palabra A»? Está en {n} mazos y se eliminará de todos junto con su progreso. No se puede deshacer." (RF-19) |
@@ -538,3 +547,4 @@ Pantallas prioritarias: `/mazos` (F-02 + F-03), F-05 (frente y reverso), F-07, F
 | 2026-10-10 | Tema tras el primer login: sigue al sistema. | Coherente con RF-42. |
 | 2026-10-10 | Animaciones de transición (RF-44): catálogo en §A.5, con tokens de motion y respeto a `prefers-reduced-motion`. | Requisito nuevo en `specs.md` (R43): evitar una interfaz plana; `specs.md` primero, luego este documento, backlog (HU-16) y plan de pruebas (TC-16.x). |
 | 2026-10-10 | Tokens corregidos al implementar: éxito `#166534`; `--color-grupo-otros` (oscuro) `#6B2F0B`. Presets de fondo = conjunto completo de tokens de página. | La verificación automática de contraste (`prototype/src/styles/tokens.test.ts`) mostró ratios < 4.5:1 con los valores iniciales. |
+| 2026-10-10 | Todo componente anima sus estados (RF-44 ampliado) y el arrastre y depósito de palabras se anima (RF-45): catálogo en §A.5, estados de F-03 y token `--mov-deposito`. | Requisito nuevo en `specs.md` (R44). `specs.md` primero; luego este documento, backlog (HU-16, HU-17), plan de pruebas (TC-16.6, TC-17.x) y arquitectura. El catálogo por componente se fijará en `docs/design-tokens.md`. |

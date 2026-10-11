@@ -16,7 +16,7 @@ Los casos se redactan declarativamente (qué se verifica, no selectores). Todos 
 
 ---
 
-## 1. Casos de prueba por criterio de aceptación (historias HU-01 a HU-16)
+## 1. Casos de prueba por criterio de aceptación (historias HU-01 a HU-17)
 
 ### HU-01 — Acceso sin contraseña (RF-09) · P0
 | ID | Escenario | Nivel | Verificación | Resultado esperado |
@@ -136,10 +136,22 @@ Los casos se redactan declarativamente (qué se verifica, no selectores). Todos 
 | TC-16.3 | Cambio de tema o paleta | E/A | Alternar tema (azul, blanco, oscuro) y presets. | Los colores cambian con transición; el contraste final cumple AA (TC-EC35). |
 | TC-16.4 | Estado de sincronización | I | Recorrer los estados del indicador. | Cada cambio se anima y mantiene texto e icono; el anuncio `aria-live` sigue emitiéndose. |
 | TC-16.5 | Movimiento reducido | E/A | Activar `prefers-reduced-motion: reduce` y repetir TC-16.1 a TC-16.4. | Los cambios son instantáneos (duraciones ≈ 0); el volteo no rota; no se pierde información ni funcionalidad. |
+| TC-16.6 | Estados de interacción de los componentes | I/E | Recorrer botón, tarjeta, campo, menú, mazo y palabra en hover, foco, pulsado y deshabilitado; montar y desmontar cada uno. | Cada estado y la aparición/salida tienen transición con tokens `--mov-*`; el foco sigue visible; sin valores fijos en el componente. |
+
+### HU-17 — Arrastrar y depositar palabras con animación (RF-45) · P2
+| ID | Escenario | Nivel | Verificación | Resultado esperado |
+|---|---|---|---|---|
+| TC-17.1 | La palabra sigue al puntero | E | Iniciar el arrastre de una palabra del panel. | La fila se eleva (sombra) y sigue al puntero o dedo; el resto del panel no se desplaza. |
+| TC-17.2 | Mazo destino resaltado | I/E | Arrastrar la palabra sobre un mazo y luego fuera de él. | El mazo se resalta al estar encima y recupera su aspecto al salir; el resaltado no depende solo del color (borde o icono). |
+| TC-17.3 | Animación de depósito | E | Soltar la palabra sobre un mazo. | La palabra entra en el mazo y el mazo reacciona; al terminar, la palabra pertenece al mazo y aparece en su grupo (RF-33/34). |
+| TC-17.4 | Soltar fuera | E | Soltar fuera de un mazo válido. | La palabra vuelve animada a su posición; no cambia de mazo. |
+| TC-17.5 | Duplicado | I/E | Soltar sobre un mazo que ya contiene la palabra. | Vuelve animada; aviso "ya está en el mazo"; sin fila duplicada (RF-36). |
+| TC-17.6 | Menú desplegable | I | Agregar con el menú de RF-20. | Se muestra la animación breve de depósito; la palabra pertenece al mazo. |
+| TC-17.7 | Movimiento reducido | E/A | Activar `prefers-reduced-motion: reduce` y repetir TC-17.1 a TC-17.6. | Cambios instantáneos, sin movimiento; aviso accesible `aria-live` de agregada o rechazada. |
 
 ---
 
-## 2. Casos de prueba por edge case del backlog (EC-01 a EC-55)
+## 2. Casos de prueba por edge case del backlog (EC-01 a EC-59)
 
 Los vacíos V-01 a V-09 están resueltos en `specs.md`; los casos antes bloqueados quedan desbloqueados y alineados con RF-14, 15, 19, 22, 27, 37 a 40.
 
@@ -200,6 +212,10 @@ Los vacíos V-01 a V-09 están resueltos en `specs.md`; los casos antes bloquead
 | TC-EC-53 | EC-53 | I/E | Responder varias tarjetas seguidas en < 100 ms cada una, con transiciones en curso → todas las respuestas se registran una sola vez y en orden; ninguna acción queda bloqueada por la animación. | 44, 06 | P2 | |
 | TC-EC-54 | EC-54 | A | Con movimiento reducido (o sin ver la animación), acierto, fallo y estado de sincronización → se comunican igualmente con texto o icono y anuncio `aria-live`. | 44 | P2 | |
 | TC-EC-55 | EC-55 | E | Sin red, repetir TC-16.1 → las transiciones funcionan igual. | 44, 28 | P2 | |
+| TC-EC-56 | EC-56 | E | Cancelar el arrastre con Escape o por interrupción del sistema → la palabra vuelve animada; no se agrega a ningún mazo. | 45 | P2 | |
+| TC-EC-57 | EC-57 | E | Sin red, arrastrar una palabra a un mazo → misma animación; el cambio se guarda localmente y se sincroniza después. | 45, 28 | P2 | |
+| TC-EC-58 | EC-58 | A | Con movimiento reducido o sin ver la animación, depositar y rechazar → aviso de texto anunciado; la palabra está en su grupo correcto. | 45 | P2 | |
+| TC-EC-59 | EC-59 | I/E | Soltar otra palabra con la animación anterior en curso → ambas quedan en su mazo sin duplicados; nada se bloquea. | 45, 44 | P2 | |
 
 ---
 
@@ -280,7 +296,7 @@ Hallazgos nuevos tras cruzar `backlog.md` con `specs.md`. Los que dependían de 
 
 ## 5. Validación final: cobertura de RF de `specs.md`
 
-Se verificó cada RF (RF-01 a RF-44) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
+Se verificó cada RF (RF-01 a RF-45) contra los casos de §1 y §2. "Parcial" = el caso existe pero no ejerce toda la cláusula del RF; se añaden casos suplementarios (TC-S) para cerrar la brecha.
 
 | RF | Casos asociados | Cobertura |
 |---|---|---|
@@ -301,7 +317,7 @@ Se verificó cada RF (RF-01 a RF-44) contra los casos de §1 y §2. "Parcial" = 
 | RF-15 | TC-06.2, TC-EC14–16 | Completa |
 | RF-16 | TC-07.1, TC-EC20, TC-S01 | **Parcial** sin TC-S01 (ningún escenario verifica que la lista esté a la izquierda) |
 | RF-17 | TC-06.1, TC-06.3, TC-EC13 | Completa. La palabra aparece en el panel derecho: TC-06.1 |
-| RF-18 | TC-08.1 | **Parcial**: solo arrastre con ratón; ver NEC-18 |
+| RF-18 | TC-08.1, TC-17.1–17.5 | **Parcial**: solo arrastre con ratón; ver NEC-18 |
 | RF-19 | TC-07.2, TC-07.3, TC-10.1–10.3, TC-EC21–23 | Completa |
 | RF-20 | TC-08.2, TC-EC19 | Completa |
 | RF-21 | TC-12.1, TC-05.4, TC-EC16, TC-EC30 | Completa |
@@ -327,11 +343,12 @@ Se verificó cada RF (RF-01 a RF-44) contra los casos de §1 y §2. "Parcial" = 
 | RF-41 | TC-EC42, TC-EC43 | Completa |
 | RF-42 | TC-EC49 | Completa |
 | RF-43 | TC-15.1–15.4, TC-EC51, TC-EC52 | Completa |
-| RF-44 | TC-16.1–16.5, TC-EC53–TC-EC55 | Completa |
+| RF-44 | TC-16.1–16.6, TC-EC53–TC-EC55 | Completa |
+| RF-45 | TC-17.1–17.7, TC-EC56–TC-EC59 | Completa |
 
 ### Resultado
 
-- **RF sin ningún test asociado: ninguno.** Los 44 RF tienen al menos un caso en §1 o §2.
+- **RF sin ningún test asociado: ninguno.** Los 45 RF tienen al menos un caso en §1 o §2.
 - **RF con cobertura parcial (cerrada con los casos suplementarios de abajo):** RF-02, RF-13, RF-16, RF-18, RF-26.
 - **Casos bloqueados:** ninguno. V-01 a V-09 se resolvieron en `specs.md` el 2026-10-10 (RF-14, 15, 19, 22, 27, 37 a 40).
 - **Requisitos fuera de la numeración RF sin test en §1–§2:** PWA instalable (manifest, service worker) y estados de carga/error genéricos (CLAUDE.md, RNF). Cubiertos por TC-S05 y TC-S06.
@@ -351,7 +368,7 @@ Se verificó cada RF (RF-01 a RF-44) contra los casos de §1 y §2. "Parcial" = 
 
 ## 6. Resumen
 
-- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-16 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-55, uno por uno; más 6 casos suplementarios.
+- **Cobertura de criterios de aceptación:** todos los escenarios Gherkin de HU-01 a HU-17 (incluido el nuevo de RF-40) y los edge cases EC-01 a EC-59, uno por uno; más 6 casos suplementarios.
 - **Casos bloqueados:** ninguno; los 9 antes bloqueados por `[A CONFIRMAR]` quedaron desbloqueados.
 - **Riesgos prioritarios (P0):** NEC-07, 06, 03, 08, 04, 11 (§4).
 - **Vacíos que siguen abiertos:** ninguno; los NEC [VACÍO] quedaron resueltos en `specs.md` (R31 a R41).
