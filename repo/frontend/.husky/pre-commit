@@ -1,0 +1,1 @@
+cd repo/frontend && npx lint-staged && npm run typecheck

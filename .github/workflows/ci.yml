@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: repo/frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: frontend/.nvmrc
+          node-version-file: repo/frontend/.nvmrc
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: repo/frontend/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
@@ -36,6 +36,6 @@ jobs:
         with:
           name: informes
           path: |
-            frontend/coverage
-            frontend/playwright-report
+            repo/frontend/coverage
+            repo/frontend/playwright-report
           if-no-files-found: ignore

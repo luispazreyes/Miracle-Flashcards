@@ -1,0 +1,198 @@
+# Miracle Flashcards — Modelo de datos (YAML semántico, no SQL)
+# Estado: BORRADOR pendiente de revisión. Fecha: 2026-10-11.
+# Fuentes: docs/specs.md (gana en caso de conflicto), docs/api-contract.md,
+#          repo/frontend/src/domain/{schemas,appearance,constants}.ts y monorepo/apps/web/src/mocks/types.ts.
+# Motor previsto: Supabase / Postgres (docs/adr/001-database-selection.md).
+
+meta:
+  conventions:
+    ids: "UUID generado por el cliente (permite crear offline). Tipo: uuid."
+    timestamps: "Contrato: milisegundos desde epoch (entero). Tipo: bigint. Aquí: timestamp_ms."
+    server_timestamps: "Las columnas *_updated_at y received_at las asigna SIEMPRE el servidor (RF-29, EC-38)."
+    normalized_text: "Texto en minúsculas, sin acentos y sin espacios sobrantes (RF-16, RF-36)."
+    user_scope: "Toda fila de usuario lleva user_id, derivado del token, nunca del cuerpo (api-contract §1)."
+  scope_decisions:
+    - "Sin tablas projects, locking ni audit_log: RF-46 es un supuesto sin design.png y H-01 (api-contract) los excluye; decisión del usuario 2026-10-11."
+    - "No existen status/priority de tareas ni project_id: el único 'status' del dominio es deck_words.status (pending|learned)."
+    - "Soft-delete (archived_at) NO se aplica: RF-19 y RF-24/RF-40 definen borrado definitivo; el borrado se propaga con lápidas (tombstones). Ver nota en tombstones."
+
+enums:
+  # Mismos literales que domain/appearance.ts y domain/schemas.ts del frontend.
+  theme:
+    source: repo/frontend/src/domain/appearance.ts (THEMES)
+    values: [white, blue, dark]
+  palette:
+    source: repo/frontend/src/domain/appearance.ts (PALETTES)
+    values: [neutral, mint, sand, lavender, graphite]
+  image_side:
+    source: repo/frontend/src/domain/appearance.ts (IMAGE_SIDES)
+    values: [front, back, both]
+    default: back          # RF-12, R45
+  word_status:
+    source: repo/frontend/src/domain/schemas.ts (statusSchema)
+    values: [pending, learned]
+  tombstone_kind:
+    source: api-contract §1.2 (Changes.deleted)
+    values: [word, deck, deck_word]
+  op_outcome:
+    source: api-contract §2.2 (S1)
+    values: [applied, alreadyApplied, discarded]
+
+constants:
+  # Fuente: domain/constants.ts
+  LEARNED_THRESHOLD: 3        # RF-07
+  DECK_NAME_MAX: 60           # RF-16
+
+tables:
+
+  users:
+    description: "Cuenta identificada por email (RF-09). Espejo de auth.users de Supabase Auth (ADR-001, H-05)."
+    columns:
+      id:         { type: uuid, constraints: [PK] }
+      email:      { type: text, constraints: [NOT NULL, UNIQUE], note: "Identifica de forma única al usuario; guardar normalizado a minúsculas." }
+      created_at: { type: timestamp_ms, constraints: [NOT NULL, "DEFAULT now()"] }
+    indexes:
+      - { name: ux_users_email, columns: [email], unique: true }
+    business_notes:
+      - "Enlace mágico (caducidad 1 h, un solo uso, cooldown 60 s) delegado en Supabase Auth; ver RF-37. No hay tabla magic_links."
+
+  words:
+    description: "Tarjeta: término en inglés + traducción (S-02). Marca de tiempo por campo para resolver conflictos por campo (RF-29)."
+    columns:
+      id:                  { type: uuid, constraints: [PK] }
+      user_id:             { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"] }
+      english:             { type: text, constraints: [NOT NULL, "CHECK length(trim(english)) > 0"] }
+      normalized_english:  { type: text, constraints: [NOT NULL], note: "Clave de duplicado (RF-36); NO única: crear un duplicado solo avisa." }
+      spanish:             { type: text, constraints: [NOT NULL, "CHECK length(trim(spanish)) > 0"] }
+      image_url:           { type: text, constraints: ["CHECK http(s)"], note: "Solo enlace; no se almacenan archivos (RF-03, RF-15)." }
+      image_verified:      { type: boolean, constraints: [NOT NULL, "DEFAULT false"], note: "false = 'sin verificar' (RF-15)." }
+      example:             { type: text, constraints: [] }
+      note:                { type: text, constraints: [] }
+      english_updated_at:  { type: timestamp_ms, constraints: [NOT NULL] }
+      spanish_updated_at:  { type: timestamp_ms, constraints: [NOT NULL] }
+      image_updated_at:    { type: timestamp_ms, constraints: [NOT NULL] }
+      example_updated_at:  { type: timestamp_ms, constraints: [NOT NULL] }
+      note_updated_at:     { type: timestamp_ms, constraints: [NOT NULL] }
+      created_at:          { type: timestamp_ms, constraints: [NOT NULL, "DEFAULT now()"], note: "Informativo (hora del cliente)." }
+      version:             { type: bigint, constraints: [NOT NULL], note: "Contador monótono del servidor; base del cursor de GET /sync/changes." }
+    indexes:
+      - { name: ix_words_user_normalized_english, columns: [user_id, normalized_english], purpose: "Detección de duplicados (RF-36, EC-44, duplicateEnglish)." }
+      - { name: ix_words_user_version, columns: [user_id, version], purpose: "Pull incremental: versión > cursor." }
+      - { name: ix_words_search, columns: [normalized_english, spanish], kind: trigram_gin, optional: true, purpose: "Búsqueda por subcadena en inglés/español (RF-43, GET /words?q=). Hoy se filtra en cliente." }
+    business_notes:
+      - "Borrado definitivo (RF-19): elimina la palabra, sus deck_words y su historial; deja lápida en tombstones."
+      - "Una operación sobre una palabra con lápida se descarta (reason: deleted, EC-41)."
+
+  decks:
+    description: "Mazo (RF-16). El nombre es único por usuario sin distinguir mayúsculas ni acentos."
+    columns:
+      id:              { type: uuid, constraints: [PK] }
+      user_id:         { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"] }
+      name:            { type: text, constraints: [NOT NULL, "CHECK length(trim(name)) BETWEEN 1 AND 60"] }
+      normalized_name: { type: text, constraints: [NOT NULL] }
+      updated_at:      { type: timestamp_ms, constraints: [NOT NULL], note: "Asignada por el servidor." }
+      created_at:      { type: timestamp_ms, constraints: [NOT NULL, "DEFAULT now()"] }
+      version:         { type: bigint, constraints: [NOT NULL] }
+    indexes:
+      - { name: ux_decks_user_normalized_name, columns: [user_id, normalized_name], unique: true, purpose: "409 DECK_NAME_TAKEN (RF-16)." }
+      - { name: ix_decks_user_version, columns: [user_id, version], purpose: "Pull incremental." }
+    business_notes:
+      - "Borrar un mazo conserva sus palabras, que quedan sin mazo (RF-24); elimina sus deck_words y progreso (D4)."
+
+  deck_words:
+    description: "Relación N:M palabra↔mazo (RF-23) que además guarda el progreso por mazo (RF-30)."
+    primary_key: [deck_id, word_id]          # PK compuesta; impide duplicar la palabra en el mismo mazo (RF-36)
+    columns:
+      deck_id:          { type: uuid, constraints: [NOT NULL, "FK→decks.id", "ON DELETE CASCADE"] }
+      word_id:          { type: uuid, constraints: [NOT NULL, "FK→words.id", "ON DELETE CASCADE"] }
+      user_id:          { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"], note: "Redundante; deck y palabra deben pertenecer al mismo usuario (aplicar por RLS/CHECK)." }
+      consecutive_hits: { type: smallint, constraints: [NOT NULL, "DEFAULT 0", "CHECK BETWEEN 0 AND 3"] }
+      status:           { type: word_status, constraints: [NOT NULL, "DEFAULT 'pending'"] }
+      version:          { type: bigint, constraints: [NOT NULL] }
+    checks:
+      - "status = 'learned' ⇔ consecutive_hits = 3 (RF-07). Reactivar pone hits = 0 y status = 'pending' (RF-27)."
+    indexes:
+      - { name: ix_deck_words_deck_status, columns: [deck_id, status], purpose: "Cola de estudio y progreso por mazo (M1, R2: ?status=)." }
+      - { name: ix_deck_words_word, columns: [word_id], purpose: "En cuántos mazos está una palabra (R6) y agrupación del panel (RF-33/34)." }
+      - { name: ix_deck_words_user_version, columns: [user_id, version], purpose: "Pull incremental." }
+    business_notes:
+      - "Quitar del mazo (RF-40) borra la fila y su historial; al re-agregar empieza en 0."
+      - "El contador y el estado los recalcula el servidor reproduciendo progress_events (RF-29, EC-40)."
+
+  progress_events:
+    description: "Historial de aciertos/fallos por (mazo, palabra). Fuente para recalcular contador y estado."
+    immutable: true            # append-only: sin UPDATE; solo se elimina en cascada al quitar la pertenencia o borrar palabra/mazo
+    columns:
+      id:                 { type: uuid, constraints: [PK], note: "eventId generado por el cliente; reenviar es idempotente (EC-37)." }
+      user_id:            { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"] }
+      deck_id:            { type: uuid, constraints: [NOT NULL] }
+      word_id:            { type: uuid, constraints: [NOT NULL] }
+      hit:                { type: boolean, constraints: [NOT NULL] }
+      local_order:        { type: integer, constraints: [NOT NULL, "CHECK >= 0"], note: "Desempate dentro de un mismo lote." }
+      recorded_at_client: { type: timestamp_ms, constraints: [NOT NULL], note: "Informativo." }
+      received_at:        { type: timestamp_ms, constraints: [NOT NULL], note: "Asignado por el servidor; ordena la reproducción." }
+    foreign_keys:
+      - { columns: [deck_id, word_id], references: "deck_words(deck_id, word_id)", on_delete: CASCADE }
+    indexes:
+      - { name: ix_progress_events_pair_order, columns: [deck_id, word_id, received_at, local_order], purpose: "Reproducción ordenada para recalcular (api-contract S1 regla 4)." }
+    business_notes:
+      - "Un eventId repetido con otro cuerpo → 409 EVENT_ID_CONFLICT."
+
+  preferences:
+    description: "Apariencia sincronizada con la cuenta (RF-10, RF-11, RF-12, RF-42). Relación 1:1 con users."
+    primary_key: [user_id]     # PK = FK → 1:1 con users
+    columns:
+      user_id:            { type: uuid, constraints: [PK, "FK→users.id", "ON DELETE CASCADE"] }
+      theme:              { type: theme, constraints: [NOT NULL, "DEFAULT 'white'"], note: "Sin preferencia guardada el cliente sigue al sistema (RF-42)." }
+      background_palette: { type: palette, constraints: [NOT NULL, "DEFAULT 'neutral'"] }
+      card_palette:       { type: palette, constraints: [NOT NULL, "DEFAULT 'neutral'"] }
+      image_side:         { type: image_side, constraints: [NOT NULL, "DEFAULT 'back'"] }
+      updated_at:         { type: timestamp_ms, constraints: [NOT NULL], note: "Asignada por el servidor; gana el cambio más reciente." }
+      version:            { type: bigint, constraints: [NOT NULL] }
+    indexes: []
+    business_notes:
+      - "La fila puede no existir: GET /preferences devuelve valores por defecto (R3)."
+
+  sync_ops:
+    description: "Registro de idempotencia de POST /sync/push por opId (EC-37)."
+    columns:
+      op_id:       { type: uuid, constraints: [PK] }
+      user_id:     { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"] }
+      outcome:     { type: op_outcome, constraints: [NOT NULL] }
+      reason:      { type: text, constraints: [], note: "Solo 'deleted' cuando outcome = discarded." }
+      received_at: { type: timestamp_ms, constraints: [NOT NULL] }
+    indexes:
+      - { name: ix_sync_ops_user_received, columns: [user_id, received_at], purpose: "Depuración/expiración de registros antiguos." }
+    business_notes:
+      - "Una op ya aplicada → alreadyApplied; ya descartada → discarded."
+
+  tombstones:
+    description: "Lápidas de borrado para GET /sync/changes (Changes.deleted) y para que el borrado prevalezca (RF-29, EC-41)."
+    primary_key: [user_id, kind, entity_id, secondary_id]   # secondary_id = '' salvo deck_word
+    columns:
+      user_id:      { type: uuid, constraints: [NOT NULL, "FK→users.id", "ON DELETE CASCADE"] }
+      kind:         { type: tombstone_kind, constraints: [NOT NULL] }
+      entity_id:    { type: uuid, constraints: [NOT NULL], note: "word.id | deck.id | deck_id (si kind = deck_word)." }
+      secondary_id: { type: text, constraints: [NOT NULL, "DEFAULT ''"], note: "word_id si kind = deck_word." }
+      version:      { type: bigint, constraints: [NOT NULL] }
+    indexes:
+      - { name: ix_tombstones_user_version, columns: [user_id, version], purpose: "Pull incremental de borrados." }
+    business_notes:
+      - "Sustituye al soft-delete con archived_at: el borrado es definitivo (RF-19) y solo se conserva la lápida."
+      - "Una palabra o mazo con lápida no se recrea con el mismo id (WORD_ID_CONFLICT / 410)."
+
+relationships:
+  - { from: users,           to: words,           type: "1:N", via: words.user_id }
+  - { from: users,           to: decks,           type: "1:N", via: decks.user_id }
+  - { from: users,           to: preferences,     type: "1:1", via: "preferences.user_id (PK=FK)" }
+  - { from: words,           to: decks,           type: "N:M", via: deck_words, key: "PK compuesta (deck_id, word_id)" }
+  - { from: deck_words,      to: progress_events, type: "1:N", via: "(progress_events.deck_id, progress_events.word_id)" }
+
+local_only_not_persisted_on_server:
+  - "outbox, caché de imágenes y la op image.verify viven solo en el cliente (IndexedDB / service worker); no son tablas del servidor."
+  - "Las palabras sin mazo no tienen fila en deck_words ni progreso (RF-26, RF-33)."
+
+open_questions:
+  - "Las lápidas y 'version' son inferencias del cursor numérico del contrato (api-contract §1, S2); confirmar si Supabase las implementa así (H-04)."
+  - "H-04/H-05 (api-contract): confirmar Edge Functions vs PostgREST y si A1–A3 son proxy de Supabase Auth o se omiten."
+  - "Integridad multiusuario (deck y word del mismo user_id en deck_words): ¿RLS, CHECK o trigger?"

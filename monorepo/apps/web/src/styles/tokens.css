@@ -1,0 +1,218 @@
+/* Design Tokens — fuente: docs/design-tokens.md (aprobado). Ningún componente usa valores fuera de aquí.
+   Nombres de variables y utilidades según design-tokens.md (en español); los atributos de tema y de
+   preset van en inglés (frontend-specs.md D-05): data-theme, data-background-palette, data-card-palette.
+   Esta es la ÚNICA fuente de los colores de tema y de preset: el script de index.html solo pone atributos,
+   y tokens.test.ts lee este archivo para verificar el contraste. */
+
+@theme static {
+  /* Color (tema white por defecto; se redefine por [data-theme]) */
+  --color-fondo: #ffffff;
+  --color-superficie: #f3f4f6;
+  --color-texto: #111827;
+  --color-texto-suave: #4b5563;
+  --color-primario: #1d4ed8;
+  --color-sobre-primario: #ffffff;
+  --color-borde: #6b7280;
+  --color-error: #b91c1c;
+  --color-exito: #166534;
+  --color-aviso: #92400e;
+  --color-foco: #1d4ed8;
+  --color-grupo-mazo: #dbeafe;
+  --color-grupo-otros: #fef3c7;
+  --color-grupo-sin: #ede9fe;
+  --color-tarjeta: #ffffff;
+  --color-sobre-tarjeta: #111827;
+
+  /* Tipografía */
+  --fuente-base: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--fuente-base);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-palabra: clamp(1.75rem, 6vw, 3rem);
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --interlineado: 1.5;
+
+  /* Espaciado (base 4 px = 0.25rem) */
+  --spacing: 0.25rem;
+
+  /* Radios */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-pill: 999px;
+
+  /* Sombras */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.12);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.16);
+  --shadow-3: 0 12px 32px rgb(0 0 0 / 0.24);
+
+  /* Motion */
+  --mov-rapido: 120ms;
+  --mov-medio: 240ms;
+  --mov-volteo: 400ms;
+  --mov-deposito: 300ms;
+  --mov-curva: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: var(--mov-rapido);
+  --default-transition-timing-function: var(--mov-curva);
+}
+
+:root {
+  --objetivo-min: 2.75rem; /* 44 px */
+  --foco-ancho: 3px;
+  --foco-desfase: 2px;
+  --ancho-contenido: 72rem;
+  --ancho-panel-mazos: 18rem;
+  --capa-base: 0;
+  --capa-sticky: 10;
+  --capa-menu: 20;
+  --capa-dialogo: 30;
+  --capa-aviso: 40;
+  /* RF-44: recorrido y escala de las entradas; con movimiento reducido valen 0 y 1 */
+  --mov-distancia: 0.5rem;
+  --mov-escala-entrada: 0.96;
+  /* RF-45: palabra elevada durante el arrastre; con movimiento reducido vale 1 */
+  --mov-escala-elevada: 1.03;
+}
+
+/* El tema blanco coincide con la base: se declara también por atributo para poder mostrar su muestra
+   (ajustes) dentro de una página azul u oscura. tokens.test.ts verifica que no se desvíe de la base. */
+[data-theme='white'] {
+  --color-fondo: #ffffff;
+  --color-superficie: #f3f4f6;
+  --color-texto: #111827;
+  --color-texto-suave: #4b5563;
+  --color-primario: #1d4ed8;
+  --color-sobre-primario: #ffffff;
+  --color-borde: #6b7280;
+  --color-error: #b91c1c;
+  --color-exito: #166534;
+  --color-aviso: #92400e;
+  --color-foco: #1d4ed8;
+  --color-grupo-mazo: #dbeafe;
+  --color-grupo-otros: #fef3c7;
+  --color-grupo-sin: #ede9fe;
+}
+
+[data-theme='blue'] {
+  --color-fondo: #eaf2ff;
+  --color-superficie: #ffffff;
+  --color-texto: #0b1b33;
+  --color-texto-suave: #44546f;
+  --color-primario: #1e40af;
+  --color-sobre-primario: #ffffff;
+  --color-borde: #6b7280;
+  --color-error: #b91c1c;
+  --color-exito: #166534;
+  --color-aviso: #92400e;
+  --color-foco: #1e40af;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-fondo: #0f172a;
+  --color-superficie: #1e293b;
+  --color-texto: #e5e7eb;
+  --color-texto-suave: #a8b3c5;
+  --color-primario: #93c5fd;
+  --color-sobre-primario: #0f172a;
+  --color-borde: #8190a8;
+  --color-error: #fca5a5;
+  --color-exito: #86efac;
+  --color-aviso: #fcd34d;
+  --color-foco: #93c5fd;
+  --color-grupo-mazo: #1e3a8a;
+  --color-grupo-otros: #6b2f0b;
+  --color-grupo-sin: #4c1d95;
+}
+
+/* RF-11: presets de fondo = conjunto completo de tokens de página; prevalecen sobre el tema.
+   `neutral` no define nada: rige el tema elegido. Se aplican a cualquier elemento con el atributo
+   (también a las muestras de la pantalla de ajustes). Deben ir DESPUÉS de los temas. */
+[data-background-palette='mint'],
+[data-background-palette='sand'],
+[data-background-palette='lavender'] {
+  --color-superficie: #ffffff;
+  --color-texto: #111827;
+  --color-texto-suave: #4b5563;
+  --color-primario: #1d4ed8;
+  --color-sobre-primario: #ffffff;
+  --color-borde: #6b7280;
+  --color-error: #b91c1c;
+  --color-exito: #166534;
+  --color-aviso: #92400e;
+  --color-foco: #1d4ed8;
+  --color-grupo-mazo: #dbeafe;
+  --color-grupo-otros: #fef3c7;
+  --color-grupo-sin: #ede9fe;
+}
+[data-background-palette='mint'] {
+  --color-fondo: #e6f4ea;
+}
+[data-background-palette='sand'] {
+  --color-fondo: #fbf3e4;
+}
+[data-background-palette='lavender'] {
+  --color-fondo: #efeafb;
+}
+[data-background-palette='graphite'] {
+  color-scheme: dark;
+  --color-fondo: #1f2937;
+  --color-superficie: #111827;
+  --color-texto: #e5e7eb;
+  --color-texto-suave: #a8b3c5;
+  --color-primario: #93c5fd;
+  --color-sobre-primario: #0f172a;
+  --color-borde: #8190a8;
+  --color-error: #fca5a5;
+  --color-exito: #86efac;
+  --color-aviso: #fcd34d;
+  --color-foco: #93c5fd;
+  --color-grupo-mazo: #1e3a8a;
+  --color-grupo-otros: #6b2f0b;
+  --color-grupo-sin: #4c1d95;
+}
+
+/* RF-11: presets de tarjeta = par fondo + texto. */
+[data-card-palette='neutral'] {
+  --color-tarjeta: #ffffff;
+  --color-sobre-tarjeta: #111827;
+}
+[data-card-palette='mint'] {
+  --color-tarjeta: #f0fdf4;
+  --color-sobre-tarjeta: #14532d;
+}
+[data-card-palette='sand'] {
+  --color-tarjeta: #fffbeb;
+  --color-sobre-tarjeta: #451a03;
+}
+[data-card-palette='lavender'] {
+  --color-tarjeta: #f5f3ff;
+  --color-sobre-tarjeta: #2e1065;
+}
+[data-card-palette='graphite'] {
+  --color-tarjeta: #111827;
+  --color-sobre-tarjeta: #f9fafb;
+}
+
+/* design-tokens.md §6: sin movimiento si el usuario lo pide. Debe ser el último bloque del archivo. */
+@media (prefers-reduced-motion: reduce) {
+  @theme static {
+    --mov-rapido: 0.01ms;
+    --mov-medio: 0.01ms;
+    --mov-volteo: 0.01ms;
+    --mov-deposito: 0.01ms;
+  }
+  :root {
+    --mov-rapido: 0.01ms;
+    --mov-medio: 0.01ms;
+    --mov-volteo: 0.01ms;
+    --mov-deposito: 0.01ms;
+    --mov-distancia: 0rem;
+    --mov-escala-entrada: 1;
+    --mov-escala-elevada: 1;
+  }
+}

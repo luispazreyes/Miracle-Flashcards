@@ -1,0 +1,9 @@
+Quiero una aplicación que sea de flashcards. Es decir, es como esas tarjetas que se utilizan para aprender. Quiero utilizarlas para aprender inglés. Entonces, una flashcard en el frente va a aparecer la palabra en inglés.
+
+Luego, al darle click en la flashcard, se va a voltear y va a aparecer la palabra en español. También quiero traer la habilidad para que una flashcard aparezca la imagen. No quiero que se suba la imagen que para asociar la imagen a una flashcard solo se suba el link o la referencia a esa imagen
+
+al darle vuelta a la flashcard quiero que me dé la opción de decir si la prendí o si no la prendí, es decir, si la acerté o no la acerté. Si no la acerté, entonces dentro de mi backlog de flashcards me va a volver a aparecer para que yo  me la aprenda. Si la acerté, quiero que se guarde para que me la vuelva a mostrar al menos tres veces más. Cuando haya acertado tres veces una misma palabra, eso quiere decir que ya haya aprendido esa palabra y se vaya al backlog de palabras aprendidas.
+
+Quiero tener la posibilidad de yo agregar las palabras que quiero aprender. Quiero que el login se haga a través de email. Yo puedo escribir un email, esa es la llave primaria. y bueno, que los colores sean azules o blanco o también que haya un dark mode o también que el usuario pueda personalizar la paleta de colores del fondo y de las flashcards
+
+y quiero tener la posibilidad de que la imagen se muestre tanto en el revés como en el inverso y darle la oportunidad al usuario o decidir si quiere que aparezca en una, en otra o en otra.

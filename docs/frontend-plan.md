@@ -31,7 +31,7 @@
 | 9 | Progreso y reactivación | RF-26, RF-27, RF-30; BR-09, BR-38 | 8 |
 | 10 | Ajustes y apariencia | RF-10 a RF-12, RF-41, RF-42; BR-35 a BR-37 | 5 |
 | 11 | PWA, caché de imágenes y estado offline completo | RF-14, RF-28; BR-17, BR-18, BR-39, BR-43 | 7, 8 |
-| 12 | Arrastre y depósito animado | RF-18, RF-45; BR-27 a BR-30 | 7, 11 |
+| 12 | Arrastre y depósito animado (librería: dnd-kit, ver `docs/adr/002-drag-and-drop.md`) | RF-18, RF-45; BR-27 a BR-30 | 7, 11 |
 | 13 | Animaciones transversales (RF-44) y pulido | RF-44; HU-16 | 12 |
 | 14 | E2E, accesibilidad global, despliegue | NFR, P-F3, P-F5 | todas |
 

@@ -1,0 +1,48 @@
+import type { Project } from './types'
+
+export const projects: Project[] = [
+  {
+    id: 'p-1',
+    name: 'Inglés de viaje',
+    description: 'Vocabulario para aeropuertos, hoteles y restaurantes.',
+    status: 'active',
+    deckCount: 4,
+    wordCount: 120,
+    learnedCount: 78,
+    updatedAt: '2026-10-09T18:30:00Z',
+    ownerId: 'u-1',
+  },
+  {
+    id: 'p-2',
+    name: 'Inglés de trabajo',
+    description: 'Términos de reuniones, correos y desarrollo de software.',
+    status: 'active',
+    deckCount: 6,
+    wordCount: 210,
+    learnedCount: 64,
+    updatedAt: '2026-10-10T14:05:00Z',
+    ownerId: 'u-1',
+  },
+  {
+    id: 'p-3',
+    name: 'Phrasal verbs',
+    description: 'Los verbos compuestos más usados, con ejemplos.',
+    status: 'active',
+    deckCount: 2,
+    wordCount: 85,
+    learnedCount: 85,
+    updatedAt: '2026-09-28T09:12:00Z',
+    ownerId: 'u-1',
+  },
+  {
+    id: 'p-4',
+    name: 'Preparación examen B2',
+    description: 'Lista de palabras para el examen de certificación.',
+    status: 'archived',
+    deckCount: 3,
+    wordCount: 150,
+    learnedCount: 40,
+    updatedAt: '2026-06-15T20:45:00Z',
+    ownerId: 'u-1',
+  },
+]

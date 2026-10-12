@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Solo instala paquetes publicados hace más de 1 día (1440 min)
+minimumReleaseAge: 1440
