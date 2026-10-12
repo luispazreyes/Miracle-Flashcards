@@ -4,6 +4,8 @@
 - **Fecha:** 2026-10-10
 - **Fuente de requisitos:** `docs/specs.md` (única fuente de verdad)
 
+> **Nota 2026-10-11:** el modelo se nombra en inglés (`Word`, `Deck`, `DeckWord`, `ProgressEvent`, `Preference`; ver `architecture/er_diagram.md` y `docs/frontend-specs.md` §4.1). Los nombres `words`, `decks` y `deck_words` de este ADR ya coinciden con esa nomenclatura. El frontend accede al backend mediante las interfaces `SyncRemote` y `AuthService` (con implementación mock hasta que exista el SQL).
+
 ## Contexto
 
 `docs/specs.md` §3 propone Supabase como backend de forma tentativa. Este ADR lo evalúa frente a Firebase usando solo los requerimientos de `specs.md`; no se introducen requisitos nuevos.

@@ -44,7 +44,7 @@
 
 ## 3. Stack tecnológico (tentativo; fuente CLAUDE.md, sujeto a confirmación)
 - Frontend: TypeScript + React (Vite).
-- Estilos: CSS con Design Tokens (variables CSS), tema claro/oscuro.
+- Estilos: CSS con Design Tokens (variables CSS), tema claro/oscuro. Tailwind CSS v4 se usa solo como capa de utilidades que consume esos tokens (2026-10-11, R45; ver `docs/frontend-specs.md` D-02).
 - PWA: manifest + service worker, responsive.
 - Backend: Supabase (Postgres + Auth). El enlace mágico (R2) es compatible con Supabase Auth.
 - Caché local: IndexedDB para el progreso offline (R8); service worker para las imágenes ya vistas (R5).
@@ -73,7 +73,7 @@
 | RF-09 | El acceso es por email mediante enlace mágico, sin contraseña. El email identifica de forma única al usuario. Tras el primer acceso, la sesión persiste sin conexión; ver RF-41. | (T-7, R2, R35) |
 | RF-10 | La app ofrece tema en azul, tema en blanco y modo oscuro. Las preferencias de apariencia se sincronizan con la cuenta (RF-42). | (T-7, R40) |
 | RF-11 | El usuario puede personalizar la paleta de colores del fondo y de las flashcards eligiendo entre presets predefinidos que cumplen WCAG AA; no hay selección de color libre. | (T-7, R6) |
-| RF-12 | Una preferencia global del usuario define si la imagen se muestra en el frente, en el reverso o en ambos lados de las tarjetas. | (T-9, R4) |
+| RF-12 | Una preferencia global del usuario define si la imagen se muestra en el frente, en el reverso o en ambos lados de las tarjetas. Valor inicial: reverso. | (T-9, R4, R45) |
 | RF-13 | La reaparición de las tarjetas funciona con una cola simple y el contador de aciertos; sin fechas de repaso ni intervalos. Ver RF-31 para el orden de las pasadas. | (R3, R15, R37) |
 | RF-14 | Las imágenes ya vistas se cachean para poder mostrarse sin conexión. Una imagen nunca vista y sin conexión se omite sin error (la tarjeta se estudia sin imagen) y se carga al recuperar la conexión. | (R5, R30) |
 | RF-15 | Al asociar una imagen se valida que la URL sea http(s) y que cargue como imagen. Sin conexión no se puede validar: la URL se guarda como "sin verificar" con un aviso visible y se valida al recuperar la conexión; si falla, se retira la imagen y se avisa al usuario. | (R5, R25) |
@@ -200,3 +200,4 @@ No quedan [PENDIENTE] abiertos al 2026-10-10.
 | 2026-10-10 | Búsqueda en el panel de palabras (RF-43). | R42; mejora el uso con muchas palabras; coherente con RF-20. |
 | 2026-10-10 | Animaciones de transición en la app (RF-44), con respeto a `prefers-reduced-motion`. | R43; evita una interfaz plana y aburrida; compatible con WCAG 2.1 AA y con los tokens de motion. |
 | 2026-10-10 | Todo componente anima sus estados; arrastre y depósito de palabras animados (RF-45), con equivalente en el menú de RF-20 y respeto a `prefers-reduced-motion`. | R44; amplía RF-44, no añade [PENDIENTE]; el catálogo por componente va en `docs/design-tokens.md`. |
+| 2026-10-11 | Frontend de producción en `frontend/` con Tailwind v4 sobre tokens CSS, Dexie, vite-plugin-pwa y nomenclatura en inglés en código y BD; lado de imagen inicial = reverso. | R45; detalle y versiones en `docs/frontend-specs.md` (D-01 a D-13, P-F1). Matiza el stack tentativo de §3. |

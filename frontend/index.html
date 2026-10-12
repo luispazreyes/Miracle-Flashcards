@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Miracle Flashcards</title>
+    <meta name="theme-color" content="#1d4ed8" />
+    <link rel="icon" type="image/png" href="/icono-192.png" />
+    <link rel="apple-touch-icon" href="/icono-192.png" />
+    <script>
+      // RF-42: aplica tema y paletas antes del primer pintado (sin parpadeo). Solo pone atributos en <html>;
+      // los colores salen de styles/tokens.css. Los valores válidos deben coincidir con domain/appearance.ts
+      // (lo verifica src/lib/appearance.test.ts).
+      ;(function () {
+        var THEMES = ['white', 'blue', 'dark']
+        var PALETTES = ['neutral', 'mint', 'sand', 'lavender', 'graphite']
+        var prefs = null
+        try {
+          prefs = JSON.parse(localStorage.getItem('mf:prefs') || 'null')
+        } catch (e) {}
+        prefs = prefs || {}
+        var dark = !!(
+          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        )
+        var root = document.documentElement
+        root.dataset.theme =
+          THEMES.indexOf(prefs.theme) >= 0 ? prefs.theme : dark ? 'dark' : 'white'
+        if (PALETTES.indexOf(prefs.backgroundPalette) > 0)
+          root.dataset.backgroundPalette = prefs.backgroundPalette
+        root.dataset.cardPalette =
+          PALETTES.indexOf(prefs.cardPalette) >= 0 ? prefs.cardPalette : 'neutral'
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './animations.css';
+
+@utility objetivo-min {
+  min-height: var(--objetivo-min);
+  min-width: var(--objetivo-min);
+}
+
+@layer base {
+  html {
+    font-family: var(--fuente-base);
+    line-height: var(--interlineado);
+  }
+  body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+  }
+  /* WCAG 2.4.7: el foco nunca se oculta */
+  :focus-visible {
+    outline: var(--foco-ancho) solid var(--color-foco);
+    outline-offset: var(--foco-desfase);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

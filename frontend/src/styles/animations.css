@@ -1,0 +1,131 @@
+/* RF-44 / RF-45: utilidades de animación (docs/design-tokens.md §6.3). Solo tokens de motion; con
+   movimiento reducido las duraciones valen ~0 y los desplazamientos 0 (ver tokens.css). Entradas y
+   salidas no bloquean la interacción. */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--mov-distancia));
+  }
+}
+@keyframes salir {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--mov-distancia) * -1));
+  }
+}
+@keyframes fundir {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes desvanecer {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes escalar {
+  from {
+    opacity: 0;
+    transform: scale(var(--mov-escala-entrada));
+  }
+}
+@keyframes desescalar {
+  to {
+    opacity: 0;
+    transform: scale(var(--mov-escala-entrada));
+  }
+}
+
+@utility anim-entrada {
+  animation: entrar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-salida {
+  animation: salir var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-fundido {
+  animation: fundir var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-fundido-salida {
+  animation: desvanecer var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-escala {
+  animation: escalar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-escala-salida {
+  animation: desescalar var(--mov-medio) var(--mov-curva) both;
+}
+@utility anim-menu {
+  animation: entrar var(--mov-rapido) var(--mov-curva) both;
+}
+
+/* RF-45: reacción del mazo al recibir una palabra y de la fila al agregarla con el menú. */
+@keyframes pulso-anillo {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+@keyframes pulso-contador {
+  40% {
+    transform: scale(1.35);
+  }
+}
+@utility anim-pulso-anillo {
+  animation: pulso-anillo var(--mov-deposito) var(--mov-curva) both;
+}
+@utility anim-pulso-contador {
+  display: inline-block;
+  animation: pulso-contador var(--mov-deposito) var(--mov-curva) both;
+}
+
+/* Cambio de tema o paleta: lib/appearance.ts añade esta clase solo durante el cambio. */
+.cambiando-tema,
+.cambiando-tema *,
+.cambiando-tema *::before,
+.cambiando-tema *::after {
+  transition:
+    background-color var(--mov-medio) var(--mov-curva),
+    color var(--mov-medio) var(--mov-curva),
+    border-color var(--mov-medio) var(--mov-curva),
+    fill var(--mov-medio) var(--mov-curva),
+    stroke var(--mov-medio) var(--mov-curva) !important;
+}
+
+/* RF-02: volteo de la tarjeta con --mov-volteo. Las dos caras están en el DOM; con movimiento reducido no hay
+   rotación 3D: la cara visible cambia al instante (prototype-spec §A.5). */
+.flip {
+  perspective: 60rem;
+}
+.flip-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform var(--mov-volteo) var(--mov-curva);
+}
+.flip[data-flipped='true'] .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  /* Las dos caras ocupan la misma celda: la tarjeta crece con la cara más alta y no hay scroll interno. */
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+}
+.flip-face-back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transform: none !important;
+    transition: none;
+  }
+  .flip-face-back {
+    transform: none;
+  }
+  .flip[data-flipped='false'] .flip-face-back,
+  .flip[data-flipped='true'] .flip-face-front {
+    visibility: hidden;
+  }
+}

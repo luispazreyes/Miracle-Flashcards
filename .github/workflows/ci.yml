@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      # Pruebas unitarias y de componentes (incluye contraste de tokens, axe y catálogo de animaciones) con informe
+      # de cobertura (P-F4: sin umbral bloqueante en la primera entrega).
+      - run: npm run test:coverage
+      - run: npm run build
+      # E2E en Chromium (P-F3) contra el build de producción, en modo mock (sin backend ni correo real).
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          CI: true
+          VITE_REMOTE_MODE: mock
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: informes
+          path: |
+            frontend/coverage
+            frontend/playwright-report
+          if-no-files-found: ignore
